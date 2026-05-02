@@ -1,0 +1,280 @@
+﻿<Window x:Class="MineMogulModInstaller.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MML — Mine Mogul Logic v1.0.0"
+        Width="720" Height="620" MinWidth="620" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        Background="#070a0f" ResizeMode="CanMinimize"
+        FontFamily="Segoe UI" Loaded="Window_Loaded">
+  <Window.Resources>
+    <!-- Base styles -->
+    <Style x:Key="TB" TargetType="TextBox">
+      <Setter Property="Background" Value="#0e1120"/>
+      <Setter Property="Foreground" Value="#e8edf8"/>
+      <Setter Property="BorderBrush" Value="#1e2540"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="8,0"/>
+      <Setter Property="CaretBrush" Value="#33b5e5"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TextBox">
+            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5">
+              <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="BTN" TargetType="Button">
+      <Setter Property="Background" Value="#0e1221"/>
+      <Setter Property="Foreground" Value="#e8edf8"/>
+      <Setter Property="BorderBrush" Value="#252d48"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding" Value="12,0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="BorderBrush" Value="#33b5e5"/>
+                <Setter TargetName="b" Property="Background" Value="#131828"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.35"/></Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="BTN_GREEN" TargetType="Button" BasedOn="{StaticResource BTN}">
+      <Setter Property="Background" Value="#122b1a"/>
+      <Setter Property="BorderBrush" Value="#29d96c"/>
+      <Setter Property="Foreground" Value="#29d96c"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style x:Key="BTN_RED" TargetType="Button" BasedOn="{StaticResource BTN}">
+      <Setter Property="Background" Value="#2b1212"/>
+      <Setter Property="BorderBrush" Value="#dc3c3c"/>
+      <Setter Property="Foreground" Value="#dc3c3c"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style x:Key="BTN_BIG" TargetType="Button">
+      <Setter Property="Background" Value="#163d24"/>
+      <Setter Property="Foreground" Value="#29d96c"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#29d96c"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="#1f5030"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="LBL_SEC" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#3a4462"/>
+      <Setter Property="FontSize" Value="9"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+      <Setter Property="Margin" Value="0,0,0,5"/>
+    </Style>
+    <Style x:Key="CARD" TargetType="Border">
+      <Setter Property="Background" Value="#101523"/>
+      <Setter Property="BorderBrush" Value="#1e2540"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="Margin" Value="4"/>
+    </Style>
+  </Window.Resources>
+
+  <Grid>
+    <!-- ══ LANDING VIEW ══════════════════════════════════════════════ -->
+    <Grid x:Name="LandingView" Visibility="Visible">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+
+      <!-- Header -->
+      <Border Grid.Row="0" Background="#080b14" BorderBrush="#1e2540" BorderThickness="0,0,0,1" Padding="32,22,32,20">
+        <StackPanel HorizontalAlignment="Center">
+          <Border Background="#091520" BorderBrush="#1a3d5a" BorderThickness="1" CornerRadius="12"
+                  HorizontalAlignment="Center" Padding="14,4" Margin="0,0,0,14">
+            <TextBlock Text="BepInEx 5 Mod  ·  MineMogul  ·  by Astro16"
+                       Foreground="#33b5e5" FontSize="10" FontWeight="Bold" TextAlignment="Center"/>
+          </Border>
+          <TextBlock Text="Mine Mogul Logic" FontSize="38" FontWeight="Black"
+                     Foreground="#e8edf8" TextAlignment="Center" Margin="0,0,0,8">
+            <TextBlock.Effect>
+              <DropShadowEffect Color="#33b5e5" BlurRadius="22" ShadowDepth="0" Opacity="0.25"/>
+            </TextBlock.Effect>
+          </TextBlock>
+          <TextBlock Text="Satisfactory-style factory analytics for MineMogul"
+                     Foreground="#7282a4" FontSize="12" TextAlignment="Center" Margin="0,0,0,14"/>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Border Background="#0a1e14" BorderBrush="#1a4a2a" BorderThickness="1" CornerRadius="6" Padding="10,3" Margin="3,0">
+              <TextBlock Text="Free &amp; Open-source" Foreground="#29d96c" FontSize="9" FontWeight="SemiBold"/>
+            </Border>
+            <Border Background="#091520" BorderBrush="#1a3d5a" BorderThickness="1" CornerRadius="6" Padding="10,3" Margin="3,0">
+              <TextBlock Text="BepInEx 5.4.23 x64" Foreground="#33b5e5" FontSize="9" FontWeight="SemiBold"/>
+            </Border>
+            <Border Background="#14102a" BorderBrush="#38285a" BorderThickness="1" CornerRadius="6" Padding="10,3" Margin="3,0">
+              <TextBlock Text="Windows 10/11 x64" Foreground="#a78bfa" FontSize="9" FontWeight="SemiBold"/>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Feature cards -->
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="16,12,16,4">
+        <UniformGrid x:Name="FeaturesGrid" Columns="2"/>
+      </ScrollViewer>
+
+      <!-- Get started button -->
+      <Button Grid.Row="2" Style="{StaticResource BTN_BIG}" Height="52" Margin="20,4,20,8"
+              HorizontalAlignment="Stretch" Padding="0" Click="GetStarted_Click">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="→  " FontSize="16" VerticalAlignment="Center"/>
+          <TextBlock Text="Get Started  —  Install Now" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+        </StackPanel>
+      </Button>
+
+      <!-- Footer -->
+      <TextBlock Grid.Row="3" Margin="0,0,0,10"
+                 Text="Made by Astro16  •  MML v1.0.0  •  Open-source BepInEx mod  •  Not affiliated with NoodleForge"
+                 Foreground="#252d40" FontSize="9" TextAlignment="Center"/>
+    </Grid>
+
+    <!-- ══ INSTALLER VIEW ════════════════════════════════════════════ -->
+    <Grid x:Name="InstallerView" Visibility="Collapsed">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+      </Grid.RowDefinitions>
+
+      <!-- Header -->
+      <Border Grid.Row="0" Background="#080b14" BorderBrush="#1e2540" BorderThickness="0,0,0,1" Padding="20,12">
+        <Grid>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <TextBlock Text="MML" Foreground="#e8edf8" FontSize="20" FontWeight="Black" VerticalAlignment="Center"/>
+            <TextBlock Text="Mine Mogul Logic  ·  by Astro16" Foreground="#7282a4" FontSize="11"
+                       Margin="10,0,0,0" VerticalAlignment="Center"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Border Background="#091520" BorderBrush="#1a3d5a" BorderThickness="1" CornerRadius="5"
+                    Padding="8,3" Margin="0,0,10,0">
+              <TextBlock Text="Installer" Foreground="#33b5e5" FontSize="9" FontWeight="Bold"/>
+            </Border>
+            <Button Style="{StaticResource BTN}" Content="← Back" Click="Back_Click"
+                    Height="28" Padding="10,0" FontSize="10"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- Content -->
+      <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20,14,20,8">
+
+          <!-- Game folder -->
+          <TextBlock Style="{StaticResource LBL_SEC}" Text="GAME FOLDER"/>
+          <Grid Margin="0,0,0,8" Height="32">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="txtGamePath" Grid.Column="0" Style="{StaticResource TB}"
+                     Height="32" TextChanged="GamePath_Changed"/>
+            <Button Grid.Column="1" Style="{StaticResource BTN}" Content="Browse"
+                    Click="Browse_Click" Margin="6,0,0,0" Width="72" Height="32"
+                    Foreground="#33b5e5" BorderBrush="#1a3d5a"/>
+            <Button Grid.Column="2" Style="{StaticResource BTN}" Content="⟳ Auto"
+                    Click="Auto_Click" Margin="6,0,0,0" Width="72" Height="32"/>
+          </Grid>
+
+          <!-- Status -->
+          <Border x:Name="StatusBorder" Background="#0c0f1c" BorderBrush="#1e2540"
+                  BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal">
+              <Ellipse x:Name="StatusDot" Width="9" Height="9" VerticalAlignment="Center" Margin="0,0,8,0"/>
+              <TextBlock x:Name="StatusText" Foreground="#7282a4" FontSize="11"
+                         FontWeight="SemiBold" VerticalAlignment="Center"
+                         Text="— Select a game folder above"/>
+            </StackPanel>
+          </Border>
+
+          <!-- Actions -->
+          <TextBlock Style="{StaticResource LBL_SEC}" Text="ACTIONS"/>
+          <Grid Margin="0,0,0,10" Height="46">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnInstall" Grid.Column="0" Style="{StaticResource BTN_GREEN}"
+                    Content="↓  Install" Height="46" Click="Install_Click" Margin="0,0,6,0"/>
+            <Button x:Name="btnUninstall" Grid.Column="1" Style="{StaticResource BTN_RED}"
+                    Content="×  Uninstall" Height="46" Click="Uninstall_Click" Margin="0,0,6,0"/>
+            <Button x:Name="btnFolder" Grid.Column="2" Style="{StaticResource BTN}"
+                    Content="📂  Folder" Height="46" Click="OpenFolder_Click"/>
+          </Grid>
+
+          <!-- Checkbox -->
+          <CheckBox x:Name="chkRemoveBep" Foreground="#7282a4" FontSize="10" Margin="0,0,0,12"
+                    Content="Also remove BepInEx folder on uninstall"/>
+
+          <!-- Progress -->
+          <Border Background="#0c0f1c" BorderBrush="#1e2540" BorderThickness="1"
+                  CornerRadius="4" Height="7" Margin="0,0,0,14" ClipToBounds="True">
+            <Border x:Name="ProgressFill" HorizontalAlignment="Left" Width="0" CornerRadius="4">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                  <GradientStop Color="#29d96c" Offset="0"/>
+                  <GradientStop Color="#33b5e5" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.Background>
+            </Border>
+          </Border>
+
+          <!-- Log -->
+          <TextBlock Style="{StaticResource LBL_SEC}" Text="LOG"/>
+          <Border Background="#06080e" BorderBrush="#1e2540" BorderThickness="1"
+                  CornerRadius="6" Height="195" ClipToBounds="True">
+            <ScrollViewer x:Name="LogScroller" VerticalScrollBarVisibility="Auto" Padding="2">
+              <TextBox x:Name="txtLog" Background="Transparent" Foreground="#64dc78"
+                       BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
+                       Padding="8,6" FontFamily="Cascadia Code,Consolas" FontSize="10"
+                       VerticalAlignment="Top"/>
+            </ScrollViewer>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Footer -->
+      <TextBlock Grid.Row="2" Margin="0,4,0,8"
+                 Text="Made by Astro16  •  MML v1.0.0  •  Not affiliated with NoodleForge"
+                 Foreground="#252d40" FontSize="9" TextAlignment="Center"/>
+    </Grid>
+  </Grid>
+</Window>

@@ -4,14 +4,14 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+    <RootNamespace>MineMogulModInstaller</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="banner.png" />
     <EmbeddedResource Include="app.ico" />
     <EmbeddedResource Include="MML.dll" />
     <EmbeddedResource Include="BepInEx.zip" />
