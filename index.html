@@ -426,20 +426,20 @@ footer{
 
       <div class="feat-card">
         <div class="feat-icon">🔧</div>
-        <h3>Splitter Wrench</h3>
-        <p>A buyable tool from the in-game shop. <b>Left-click</b> any RollerSplitter
-           to set routing ratios per resource type. <b>Right-click</b> opens a global view of every splitter on the map.</p>
+        <h3>Splitter Inspector</h3>
+        <p>Kijk naar een splitter en druk <b>F</b> om het configuratiescherm te openen — stel routing-ratio's in per resourcetype. Druk <b>Tab</b> voor een overzicht van alle splitters op de map. <b>Geen shop item nodig.</b></p>
         <div class="feat-tags">
-          <span class="tag tag-new">New · v1.0</span>
-          <span class="tag tag-tool">Shop Item</span>
+          <span class="tag tag-key">F</span>
+          <span class="tag tag-key">Tab</span>
+          <span class="tag tag-new">Crosshair</span>
         </div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">🏷️</div>
-        <h3>Belt Scanner</h3>
-        <p>A purchasable tool from the shop (Tools category). Uses the <b>ResourceScanner model</b>. When equipped, floating items/min labels appear above every nearby belt — color-coded by throughput.</p>
-        <div class="feat-tags"><span class="tag tag-tool">Shop Item</span><span class="tag tag-new">New · v1.0</span></div>
+        <h3>Belt Inspector</h3>
+        <p>Kijk naar een belt → rechtsonder verschijnt automatisch een <b>detail panel</b> met status, doorvoer (items/min), snelheid en naam. Druk <b>F6</b> voor zwevende labels boven alle naburige belts — kleurgecodeerd: groen (snel), geel (langzaam), rood (bottleneck).</p>
+        <div class="feat-tags"><span class="tag tag-key">F6</span><span class="tag tag-new">Crosshair</span></div>
       </div>
 
       <div class="feat-card">
@@ -480,10 +480,11 @@ footer{
     </div>
     <div class="key-grid reveal">
       <div class="key-card"><kbd>F5</kbd><div class="key-desc">Toggle Factory HUD overlay<small>Opens the live analytics window</small></div></div>
-      <div class="key-card"><kbd>LMB</kbd><div class="key-desc">Configure splitter (Wrench)<small>Point at splitter, up to 8 m</small></div></div>
-      <div class="key-card"><kbd>RMB</kbd><div class="key-desc">Global splitter manager (Wrench)<small>See all splitters on the map</small></div></div>
+      <div class="key-card"><kbd>F6</kbd><div class="key-desc">Toggle belt labels<small>Zwevende items/min boven alle naburige belts</small></div></div>
+      <div class="key-card"><kbd>F</kbd><div class="key-desc">Configureer splitter<small>Kijk naar een splitter en druk F</small></div></div>
+      <div class="key-card"><kbd>Tab</kbd><div class="key-desc">Alle splitters overzicht<small>Globale manager — alle splitters op de map</small></div></div>
       <div class="key-card"><kbd style="font-size:.68rem;min-width:unset;padding:.3rem .5rem">Terminal</kbd><div class="key-desc">Factory Overview interaction<small>Opens HUD from any computer terminal</small></div></div>
-      <div class="key-card"><kbd>Equip</kbd><div class="key-desc">Belt Scanner labels<small>Floating IPM above belts when scanner is held</small></div></div>
+      <div class="key-card"><kbd>Aim</kbd><div class="key-desc">Belt detail panel<small>Kijk naar een belt voor live stats rechtsonder</small></div></div>
     </div>
   </div>
 </section>
@@ -512,17 +513,16 @@ footer{
         </div>
         <div class="cl-body">
           <ul>
-            <li><div class="cl-dot dot-add"></div><div><b>Splitter Wrench</b> — new purchasable tool. LMB configures the splitter you aim at (RollerSplitter &amp; ConveyorSplitterT2); RMB opens global manager for all splitters on the map.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Splitter Inspector</b> — kijk naar een splitter, druk <b>F</b> om te configureren (routing-ratio per resourcetype). <b>Tab</b> opent het globale overzicht. Geen shop item nodig.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>uGUI Factory HUD</b> — dark canvas-based overlay with Machines, Belts, Sales and Settings tabs; draggable, live-updating, toggled with F5.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>Terminal integration</b> — "Factory Overview" interaction added to every Computer Terminal.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>Throughput Tracker</b> — items/min per conveyor belt, sorted and color-coded in the HUD.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>Bottleneck Detector</b> — statistical outlier detection flags slowest belts in red.</div></li>
-            <li><div class="cl-dot dot-add"></div><div><b>Belt Scanner</b> — new purchasable tool (Tools shop). Uses ResourceScanner model. When equipped, shows floating IPM labels above nearby belts — color-coded: green (fast), yellow (slow), red (bottleneck).</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Belt Inspector</b> — kijk naar een belt → detail panel rechtsonder (status, doorvoer, snelheid). F6 toont zwevende IPM-labels boven alle naburige belts — groen/geel/rood.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>Sales Tracker</b> — session revenue, top resources, €/min rate.</div></li>
             <li><div class="cl-dot dot-add"></div><div><b>Ore Analyser Upgrade</b> — extends scanner with sell value &amp; sorter stats.</div></li>
-            <li><div class="cl-dot dot-fix"></div><div><b>Shop injection fix</b> — wrench now correctly appears in the Tools tab and is given to the player on purchase.</div></li>
-            <li><div class="cl-dot dot-fix"></div><div><b>Cursor lock fixed</b> — F5 HUD no longer steals cursor focus while the wrench is equipped.</div></li>
-            <li><div class="cl-dot dot-brk"></div><div><b>Sorter Presets removed</b> — not achievable without private game API access; replaced by Splitter Wrench.</div></li>
+            <li><div class="cl-dot dot-fix"></div><div><b>DPI scaling fixed</b> — installer UI correct geschaald op alle DPI-instellingen.</div></li>
+            <li><div class="cl-dot dot-brk"></div><div><b>Shop injection removed</b> — belt scanner &amp; splitter wrench waren shop items; vervangen door directe crosshair-interactie.</div></li>
           </ul>
         </div>
       </div>
@@ -566,7 +566,7 @@ footer{
             <div class="step-num">4</div>
             <div class="step-body">
               <h4>Press F5 in-game</h4>
-              <p>The Factory HUD opens. Visit the in-game shop terminal to buy the <b>Splitter Wrench</b> from the Tools category.</p>
+            <p>Press <b>F5</b> — the Factory HUD opens. Kijk naar een belt voor live stats. Kijk naar een splitter en druk <b>F</b> om te configureren.</p>
             </div>
           </div>
         </div>

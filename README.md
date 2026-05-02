@@ -12,10 +12,10 @@
 | 1 | **Throughput Tracker** — real-time items/min measurement per conveyor belt | — |
 | 2 | **Bottleneck Detector** — statistical outlier detection flags your slowest belts | — |
 | 3 | **Factory HUD** — full overlay with Machines, Belts, Sales & Settings tabs | **F5** |
-| 4 | **Belt Scanner** — koopbaar item (shop → Tools). Uitgerust: zwevende items/min labels boven nearby belts. Gebruikt het model van de ResourceScanner tool. | Shop |
-| 5 | **Ore Analyser Upgrade** — extended scanner readout: type, sell value, history & sorter stats | — |
-| 6 | **Sales Tracker** — lifetime earnings, session revenue and top-selling resources | — |
-| 7 | **Splitter Wrench** — koopbaar item (shop → Tools). LMB configureert de splitter waar je naar kijkt; RMB opent globaal beheer. Gebruikt het model van de ResourceScanner tool. | Shop |
+| 4 | **Belt Inspector** — kijk naar een belt → detail panel rechtsonder (status, doorvoer, snelheid). **F6** toont/verbergt zwevende labels boven alle naburige belts. | **F6** |
+| 5 | **Splitter Inspector** — kijk naar een splitter → druk **F** om het configuratiescherm te openen. **Tab** opent het overzicht van alle splitters. Geen shop item nodig. | **F** / **Tab** |
+| 6 | **Ore Analyser Upgrade** — extended scanner readout: type, sell value, history & sorter stats | — |
+| 7 | **Sales Tracker** — lifetime earnings, session revenue and top-selling resources | — |
 
 ---
 
@@ -38,7 +38,10 @@
 
 | Key | Action |
 |-----|--------|
-| **F5** | Open / close the MML HUD overlay |
+| **F5** | Open / close the Factory HUD overlay |
+| **F6** | Toggle zwevende belt labels (items/min boven alle naburige belts) |
+| **F** | Configureer de splitter waar je naar kijkt (crosshair) |
+| **Tab** | Open globaal splitter overzicht (alle splitters op de map) |
 
 All thresholds and display options are adjustable live in the **Settings** tab of the HUD.
 
@@ -78,5 +81,7 @@ See [CONTRIBUTING.md](https://github.com/p-astro16/MineMogulLogicMod/tree/main) 
 - 📋 [Changelog](https://github.com/p-astro16/MineMogulLogicMod/releases)
 
 ---
+
+> **Changelog v1.0.0** → Belt Inspector + Splitter Inspector via crosshair, geen shop items meer nodig. F6 = belt labels, F = splitter config, Tab = alle splitters.
 
 *Not affiliated with or endorsed by NoodleForge / the MineMogul developers.*
