@@ -1,0 +1,23 @@
+# Build output
+**/bin/
+**/obj/
+
+# Game files (not to be redistributed)
+MineMogul/
+
+# Dist zip (built artifact)
+dist/
+*.zip
+
+# BepInEx runtime folder (bundled separately)
+BepInEx_win_x64_5.4.23.5/
+
+# VS/Rider
+.vs/
+*.user
+*.suo
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
