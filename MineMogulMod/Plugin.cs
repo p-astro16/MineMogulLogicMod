@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MineMogulMod.Modules;
 using MineMogulMod.Modules.Splitter;
+using MineMogulMod.Patches;
 using UnityEngine;
 
 namespace MineMogulMod
@@ -14,34 +15,49 @@ namespace MineMogulMod
         internal static Plugin Instance = null!;
 
         private Harmony _harmony = null!;
-        private GameObject _modObject = null!;
 
         private void Awake()
         {
             Instance = this;
-            Logger = base.Logger;
+            Logger   = base.Logger;
 
             ModSettings.Init(Config);
 
             _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             _harmony.PatchAll();
 
-            Logger.LogInfo($"{MyPluginInfo.PLUGIN_NAME} v{MyPluginInfo.PLUGIN_VERSION} geladen!");
-            Logger.LogInfo("In-game: F5 = MML HUD  |  F6 = Belt counters");
+            Logger.LogInfo($"[MML] {MyPluginInfo.PLUGIN_NAME} v{MyPluginInfo.PLUGIN_VERSION} loaded.");
+            Logger.LogInfo("[MML] F5 = Factory HUD  |  F6 = Belt Counter  |  F7 = Spawn Splitter Wrench");
         }
 
         private void Start()
         {
-            // Maak een persistent GameObject aan voor alle mod-componenten
-            _modObject = new GameObject("MineMogulMod_Root");
-            DontDestroyOnLoad(_modObject);
+            var root = new GameObject("MML_Root");
+            DontDestroyOnLoad(root);
 
-            _modObject.AddComponent<ThroughputTracker>();
-            _modObject.AddComponent<SalesTracker>();
-            _modObject.AddComponent<FactoryHUD>();
-            _modObject.AddComponent<BottleneckDetector>();
-            _modObject.AddComponent<SplitterConfigUI>();
-            SplitterStorage.Load();
+            AddSafe<ThroughputTracker>  (root, "ThroughputTracker");
+            AddSafe<SalesTracker>       (root, "SalesTracker");
+            AddSafe<BottleneckDetector> (root, "BottleneckDetector");
+            AddSafe<BeltItemCounter>    (root, "BeltItemCounter");
+            AddSafe<FactoryHUD>         (root, "FactoryHUD");
+            AddSafe<SplitterConfigUI>   (root, "SplitterConfigUI");
+            AddSafe<WrenchSpawnWatcher> (root, "WrenchSpawnWatcher");
+
+            try { SplitterStorage.Load(); }
+            catch (System.Exception ex) { Logger.LogWarning("[MML] SplitterStorage.Load failed: " + ex.Message); }
+        }
+
+        private static void AddSafe<T>(GameObject root, string name) where T : MonoBehaviour
+        {
+            try
+            {
+                root.AddComponent<T>();
+                Logger.LogInfo($"[MML] {name} OK");
+            }
+            catch (System.Exception ex)
+            {
+                Logger.LogWarning($"[MML] {name} failed to initialise: {ex.Message}");
+            }
         }
 
         private void OnDestroy()

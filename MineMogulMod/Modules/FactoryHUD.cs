@@ -356,6 +356,7 @@ namespace MineMogulMod.Modules
             TogRow(c, "Bottleneck Detector",  ModSettings.EnableBottleneckDetector);
             TogRow(c, "Sales Tracker",        ModSettings.EnableSalesTracker);
             TogRow(c, "Ore Analyser Upgrade", ModSettings.EnableOreAnalyserUpgrade);
+            TogRow(c, "Belt Counter (F6)",    ModSettings.EnableBeltCounter);
 
             SectionRow(c, "Throughput Tracker");
             StepRow(c, "Window (sec)",     ModSettings.ThroughputWindowSeconds,   10f, 300f, 5f);
@@ -382,15 +383,16 @@ namespace MineMogulMod.Modules
             rBtn.targetGraphic = rImg;
             var rc = rBtn.colors; rc.highlightedColor = C(180, 40, 40); rBtn.colors = rc;
             rBtn.onClick.AddListener(() => {
-                ModSettings.EnableThroughputTracker.Value       = (bool)ModSettings.EnableThroughputTracker.DefaultValue;
-                ModSettings.EnableBottleneckDetector.Value      = (bool)ModSettings.EnableBottleneckDetector.DefaultValue;
-                ModSettings.EnableSalesTracker.Value            = (bool)ModSettings.EnableSalesTracker.DefaultValue;
-                ModSettings.EnableOreAnalyserUpgrade.Value      = (bool)ModSettings.EnableOreAnalyserUpgrade.DefaultValue;
+                ModSettings.EnableThroughputTracker.Value       = (bool) ModSettings.EnableThroughputTracker.DefaultValue;
+                ModSettings.EnableBottleneckDetector.Value      = (bool) ModSettings.EnableBottleneckDetector.DefaultValue;
+                ModSettings.EnableSalesTracker.Value            = (bool) ModSettings.EnableSalesTracker.DefaultValue;
+                ModSettings.EnableOreAnalyserUpgrade.Value      = (bool) ModSettings.EnableOreAnalyserUpgrade.DefaultValue;
+                ModSettings.EnableBeltCounter.Value             = (bool) ModSettings.EnableBeltCounter.DefaultValue;
                 ModSettings.ThroughputWindowSeconds.Value       = (float)ModSettings.ThroughputWindowSeconds.DefaultValue;
                 ModSettings.BottleneckRefreshInterval.Value     = (float)ModSettings.BottleneckRefreshInterval.DefaultValue;
                 ModSettings.BottleneckMinFactoryIPM.Value       = (float)ModSettings.BottleneckMinFactoryIPM.DefaultValue;
                 ModSettings.HUDRefreshInterval.Value            = (float)ModSettings.HUDRefreshInterval.DefaultValue;
-                ModSettings.AnalyserShowSalesHistory.Value      = (bool)ModSettings.AnalyserShowSalesHistory.DefaultValue;
+                ModSettings.AnalyserShowSalesHistory.Value      = (bool) ModSettings.AnalyserShowSalesHistory.DefaultValue;
             });
             var rTxt = AddText(rGO, "↺  Reset all settings to default", 11, ColText, TextAnchor.MiddleCenter);
             StretchFill(rTxt.gameObject);

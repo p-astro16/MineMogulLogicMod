@@ -1,75 +1,75 @@
 using BepInEx.Configuration;
+using UnityEngine;
 
 namespace MineMogulMod
 {
-    /// <summary>
-    /// Centrale instellingen voor de hele mod.
-    /// Worden opgeslagen in BepInEx/config/com.minemogul.mml.cfg
-    /// en zijn live aanpasbaar vanuit de in-game HUD.
-    /// </summary>
     public static class ModSettings
     {
-        // ── Module aan/uit ────────────────────────────────────────────────────
-        public static ConfigEntry<bool> EnableThroughputTracker   = null!;
-        public static ConfigEntry<bool> EnableBottleneckDetector  = null!;
-        public static ConfigEntry<bool> EnableSalesTracker        = null!;
-        public static ConfigEntry<bool> EnableOreAnalyserUpgrade  = null!;
+        // ── Module toggles ─────────────────────────────────────────────────────
+        public static ConfigEntry<bool> EnableThroughputTracker  = null!;
+        public static ConfigEntry<bool> EnableBottleneckDetector = null!;
+        public static ConfigEntry<bool> EnableSalesTracker       = null!;
+        public static ConfigEntry<bool> EnableOreAnalyserUpgrade = null!;
+        public static ConfigEntry<bool> EnableBeltCounter        = null!;
 
-        // ── ThroughputTracker instellingen ────────────────────────────────────
-        public static ConfigEntry<float> ThroughputWindowSeconds  = null!;
+        // ── Hotkeys ────────────────────────────────────────────────────────────
+        public static ConfigEntry<KeyboardShortcut> HUDToggleKey         = null!;
+        public static ConfigEntry<KeyboardShortcut> BeltCounterToggleKey = null!;
+        public static ConfigEntry<KeyboardShortcut> WrenchSpawnKey       = null!;
 
-        public static ConfigEntry<float> BeltCounterMaxDistance   = null!;
-        public static ConfigEntry<float> BeltCounterMinIPM        = null!;
+        // ── Throughput ─────────────────────────────────────────────────────────
+        public static ConfigEntry<float> ThroughputWindowSeconds = null!;
 
-        // ── BottleneckDetector instellingen ───────────────────────────────────
+        // ── Belt Counter ───────────────────────────────────────────────────────
+        public static ConfigEntry<float> BeltCounterMaxDistance = null!;
+        public static ConfigEntry<float> BeltCounterMinIPM      = null!;
+
+        // ── Bottleneck ─────────────────────────────────────────────────────────
         public static ConfigEntry<float> BottleneckRefreshInterval = null!;
-        public static ConfigEntry<float> BottleneckMinFactoryIPM  = null!;
+        public static ConfigEntry<float> BottleneckMinFactoryIPM   = null!;
 
-        // ── FactoryHUD instellingen ───────────────────────────────────────────
-        public static ConfigEntry<float> HUDRefreshInterval       = null!;
-        public static ConfigEntry<KeyboardShortcut> HUDToggleKey  = null!;
-        // ── Ore Analyser instellingen ─────────────────────────────────────────
-        public static ConfigEntry<bool> AnalyserShowSalesHistory  = null!;
+        // ── HUD ────────────────────────────────────────────────────────────────
+        public static ConfigEntry<float> HUDRefreshInterval = null!;
+
+        // ── Ore Analyser ───────────────────────────────────────────────────────
+        public static ConfigEntry<bool> AnalyserShowSalesHistory = null!;
 
         internal static void Init(ConfigFile cfg)
         {
-            // ── Modules ───────────────────────────────────────────────────────
-            const string sectionModules = "1. Modules";
-            EnableThroughputTracker  = cfg.Bind(sectionModules, "ThroughputTracker",  true,  "Meet items/min op elke conveyor belt.");
-            EnableBottleneckDetector = cfg.Bind(sectionModules, "BottleneckDetector", true,  "Detecteert de traagste schakels in de fabriek.");
-            EnableSalesTracker       = cfg.Bind(sectionModules, "SalesTracker",       true,  "Houdt verkoopstatistieken bij per resource type.");
-            EnableOreAnalyserUpgrade = cfg.Bind(sectionModules, "OreAnalyserUpgrade", true,  "Verbeterde ore-analyser met waarde, polish en belt info.");
+            const string sMod = "1. Modules";
+            EnableThroughputTracker  = cfg.Bind(sMod, "ThroughputTracker",  true, "Measure items/min on every belt.");
+            EnableBottleneckDetector = cfg.Bind(sMod, "BottleneckDetector", true, "Flag the slowest belts.");
+            EnableSalesTracker       = cfg.Bind(sMod, "SalesTracker",       true, "Track session revenue.");
+            EnableOreAnalyserUpgrade = cfg.Bind(sMod, "OreAnalyserUpgrade", true, "Enhanced ore scanner info.");
+            EnableBeltCounter        = cfg.Bind(sMod, "BeltCounter",        true, "Floating items/min labels.");
 
-            // ── Throughput ────────────────────────────────────────────────────
-            const string sectionTP = "2. Throughput Tracker";
-            ThroughputWindowSeconds = cfg.Bind(sectionTP, "WindowSeconds", 60f,
-                new ConfigDescription("Tijdvenster (seconden) waarover items/min wordt berekend.", new AcceptableValueRange<float>(10f, 300f)));
+            const string sKeys = "2. Hotkeys";
+            HUDToggleKey         = cfg.Bind(sKeys, "HUDToggle",         new KeyboardShortcut(KeyCode.F5), "Toggle Factory HUD.");
+            BeltCounterToggleKey = cfg.Bind(sKeys, "BeltCounterToggle", new KeyboardShortcut(KeyCode.F6), "Toggle belt item counter.");
+            WrenchSpawnKey       = cfg.Bind(sKeys, "WrenchSpawn",       new KeyboardShortcut(KeyCode.F7), "Spawn Splitter Wrench into inventory.");
 
-            // ── Belt Counter ──────────────────────────────────────────────────
-            const string sectionBC = "3. Belt Item Counter";
-            BeltCounterMaxDistance = cfg.Bind(sectionBC, "MaxDistance", 30f,
-                new ConfigDescription("Max afstand (meters) waarop belt-labels zichtbaar zijn.", new AcceptableValueRange<float>(5f, 100f)));
-            BeltCounterMinIPM = cfg.Bind(sectionBC, "MinItemsPerMin", 0.1f,
-                new ConfigDescription("Minimale items/min voordat een label getoond wordt.", new AcceptableValueRange<float>(0f, 50f)));
+            const string sTP = "3. Throughput";
+            ThroughputWindowSeconds = cfg.Bind(sTP, "WindowSeconds", 60f,
+                new ConfigDescription("Measurement window in seconds.", new AcceptableValueRange<float>(10f, 300f)));
 
-            // ── Bottleneck ────────────────────────────────────────────────────
-            const string sectionBN = "4. Bottleneck Detector";
-            BottleneckRefreshInterval = cfg.Bind(sectionBN, "RefreshInterval", 5f,
-                new ConfigDescription("Hoe vaak (seconden) bottlenecks opnieuw berekend worden.", new AcceptableValueRange<float>(1f, 60f)));
-            BottleneckMinFactoryIPM = cfg.Bind(sectionBN, "MinFactoryIPM", 5f,
-                new ConfigDescription("Minimale gem. fabriek doorvoer voordat bottlenecks worden gedetecteerd.", new AcceptableValueRange<float>(0f, 100f)));
+            const string sBC = "4. Belt Counter";
+            BeltCounterMaxDistance = cfg.Bind(sBC, "MaxDistance", 30f,
+                new ConfigDescription("Max distance (m) to show labels.", new AcceptableValueRange<float>(5f, 100f)));
+            BeltCounterMinIPM = cfg.Bind(sBC, "MinItemsPerMin", 0.1f,
+                new ConfigDescription("Minimum items/min before label is shown.", new AcceptableValueRange<float>(0f, 50f)));
 
-            // ── HUD ───────────────────────────────────────────────────────────
-            const string sectionHUD = "5. Factory HUD";
-            HUDRefreshInterval   = cfg.Bind(sectionHUD, "RefreshInterval", 3f,
-                new ConfigDescription("Hoe vaak (seconden) de machine-lijst ververst wordt.", new AcceptableValueRange<float>(0.5f, 30f)));
-            HUDToggleKey         = cfg.Bind(sectionHUD, "ToggleKey", new KeyboardShortcut(UnityEngine.KeyCode.F5),
-                "Toets om de Factory HUD te openen/sluiten.");
+            const string sBN = "5. Bottleneck";
+            BottleneckRefreshInterval = cfg.Bind(sBN, "RefreshInterval", 5f,
+                new ConfigDescription("How often (sec) to recalculate.", new AcceptableValueRange<float>(1f, 60f)));
+            BottleneckMinFactoryIPM = cfg.Bind(sBN, "MinFactoryIPM", 5f,
+                new ConfigDescription("Minimum avg factory throughput before bottleneck detection.", new AcceptableValueRange<float>(0f, 100f)));
 
-            // ── Analyser ──────────────────────────────────────────────────────
-            const string sectionAN = "6. Ore Analyser";
-            AnalyserShowSalesHistory = cfg.Bind(sectionAN, "ShowSalesHistory", true,
-                "Toon sessie-verkoopdata in de ore analyser.");
+            const string sHUD = "6. Factory HUD";
+            HUDRefreshInterval = cfg.Bind(sHUD, "RefreshInterval", 3f,
+                new ConfigDescription("How often (sec) to refresh data.", new AcceptableValueRange<float>(0.5f, 30f)));
+
+            const string sAN = "7. Ore Analyser";
+            AnalyserShowSalesHistory = cfg.Bind(sAN, "ShowSalesHistory", true, "Show session sales in scanner.");
         }
     }
 }
