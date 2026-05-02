@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MML – Mine Mogul Logic</title>
+<style>
+  :root{
+    --bg:#0d0f12;--surface:#141720;--card:#1a1e28;--border:#252a38;
+    --accent:#33b5e5;--accent2:#29d96c;--warn:#ffbe28;--danger:#e04040;
+    --text:#e8eaf0;--muted:#7a8099;--code:#c5d0f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:100;background:rgba(13,15,18,.92);
+      backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.75rem 2rem}
+  .nav-logo{font-size:1.15rem;font-weight:700;color:var(--accent);letter-spacing:.05em;text-decoration:none}
+  .nav-logo span{color:var(--text)}
+  nav ul{list-style:none;display:flex;gap:1.5rem}
+  nav ul a{color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s}
+  nav ul a:hover{color:var(--text)}
+  .nav-badge{background:var(--warn);color:#000;font-size:.7rem;font-weight:700;
+             padding:.15rem .45rem;border-radius:999px;margin-left:.4rem}
+
+  /* HERO */
+  .hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;text-align:center;padding:4rem 2rem;
+        background:radial-gradient(ellipse 80% 60% at 50% 0%, #1a2340 0%, var(--bg) 70%)}
+  .hero-badge{display:inline-block;background:var(--border);color:var(--accent);
+              font-size:.75rem;font-weight:600;padding:.3rem .9rem;border-radius:999px;
+              border:1px solid var(--accent);margin-bottom:1.25rem;letter-spacing:.1em}
+  .hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;
+           background:linear-gradient(135deg,#fff 30%,var(--accent));
+           -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero h1 span{-webkit-text-fill-color:var(--accent)}
+  .hero p{max-width:640px;margin:1.25rem auto;font-size:1.1rem;color:var(--muted)}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.75rem;
+       border-radius:8px;font-size:.95rem;font-weight:600;text-decoration:none;
+       transition:filter .2s,transform .2s}
+  .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+  .btn-primary{background:var(--accent2);color:#000}
+  .btn-secondary{background:var(--border);color:var(--text);border:1px solid var(--muted)}
+  .chip{margin-top:2.5rem;display:inline-flex;gap:.6rem;align-items:center;
+        color:var(--muted);font-size:.8rem}
+  .chip span{background:var(--border);padding:.2rem .6rem;border-radius:4px;font-family:monospace}
+
+  /* SECTIONS */
+  section{padding:5rem 2rem}
+  .container{max-width:1100px;margin:0 auto}
+  .section-label{font-size:.7rem;font-weight:700;color:var(--accent);
+                 letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem}
+  h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;margin-bottom:.5rem}
+  .section-sub{color:var(--muted);max-width:560px;margin-bottom:3rem;font-size:.95rem}
+
+  /* FEATURES GRID */
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
+  .feat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+             padding:1.5rem;transition:border-color .2s,transform .2s}
+  .feat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .feat-icon{font-size:1.75rem;margin-bottom:.75rem}
+  .feat-card h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}
+  .feat-card p{font-size:.88rem;color:var(--muted);line-height:1.55}
+  .feat-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .5rem;
+            border-radius:4px;margin-top:.5rem}
+  .tag-new{background:rgba(41,217,108,.15);color:var(--accent2)}
+  .tag-hud{background:rgba(51,181,229,.15);color:var(--accent)}
+  .tag-key{background:rgba(255,190,40,.15);color:var(--warn)}
+  .tag-tool{background:rgba(200,100,255,.15);color:#cc88ff}
+
+  /* KEYBINDS */
+  .key-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .key-table th{text-align:left;padding:.6rem 1rem;background:var(--surface);
+                color:var(--muted);font-size:.75rem;font-weight:700;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+  .key-table td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
+  .key-table tr:last-child td{border-bottom:none}
+  kbd{background:var(--surface);border:1px solid var(--border);color:var(--accent);
+      font-family:monospace;font-size:.8rem;padding:.2rem .5rem;border-radius:4px}
+
+  /* CHANGELOG */
+  .changelog{display:flex;flex-direction:column;gap:1.5rem}
+  .cl-entry{display:grid;grid-template-columns:110px 1fr;gap:1rem}
+  .cl-meta{padding-top:.2rem}
+  .cl-ver{font-weight:700;font-size:.95rem;color:var(--text)}
+  .cl-date{font-size:.75rem;color:var(--muted);margin-top:.15rem}
+  .cl-badge-current{display:inline-block;background:var(--accent2);color:#000;
+                    font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-top:.25rem}
+  .cl-body{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem}
+  .cl-body ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+  .cl-body li{font-size:.9rem;color:var(--muted);display:flex;gap:.6rem;align-items:flex-start}
+  .cl-body li::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;
+                      margin-top:.45rem;background:var(--border)}
+  .cl-body li b{color:var(--text)}
+  .dot-add::before{background:var(--accent2) !important}
+  .dot-fix::before{background:var(--warn) !important}
+  .dot-brk::before{background:var(--danger) !important}
+  .cl-legend{display:flex;gap:1.25rem;margin-bottom:1.5rem;font-size:.8rem;color:var(--muted)}
+  .cl-legend div{display:flex;align-items:center;gap:.4rem}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+  /* INSTALL */
+  .steps{display:flex;flex-direction:column;gap:1rem;counter-reset:steps}
+  .step{display:flex;gap:1.25rem;align-items:flex-start;counter-increment:steps}
+  .step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--accent);
+            color:#000;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+  .step-body h4{font-weight:600;margin-bottom:.2rem}
+  .step-body p{font-size:.88rem;color:var(--muted)}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;
+         color:var(--muted);font-size:.8rem}
+  footer a{color:var(--muted);text-decoration:none}
+  footer a:hover{color:var(--text)}
+
+  @media(max-width:600px){
+    .cl-entry{grid-template-columns:1fr}
+    nav ul{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">MML <span>Mine Mogul Logic</span></a>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#keybinds">Controls</a></li>
+    <li><a href="#changelog">Changelog</a></li>
+    <li><a href="#install">Install</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">BepInEx Mod · MineMogul</div>
+  <h1>Mine Mogul <span>Logic</span></h1>
+  <p>Satisfactory-style factory analytics for MineMogul — live throughput HUD, bottleneck detection,
+     smart splitter routing, sales tracking and more.</p>
+  <div class="hero-btns">
+    <a class="btn btn-primary" href="https://github.com" download>⬇ Download v1.0.0</a>
+    <a class="btn btn-secondary" href="#features">Explore Features</a>
+  </div>
+  <div class="chip">
+    <span>BepInEx 5.4.23</span>
+    <span>MineMogul</span>
+    <span>v1.0.0</span>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background:var(--surface)">
+  <div class="container">
+    <div class="section-label">What's inside</div>
+    <h2>Features</h2>
+    <p class="section-sub">Everything MML adds to your MineMogul factory session.</p>
+    <div class="features-grid">
+
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>Factory HUD</h3>
+        <p>Press <kbd>F5</kbd> to open a live dark-themed overlay with five tabs:
+           Machines, Belts, Sales, Ore Analyser, and Settings.
+           All data updates in real-time while you play.</p>
+        <span class="feat-tag tag-hud">HUD · F5</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">⚙️</div>
+        <h3>Throughput Tracker</h3>
+        <p>Tracks items-per-minute on every conveyor belt in your factory.
+           See what each belt is carrying and at what rate — no guesswork needed.</p>
+        <span class="feat-tag tag-hud">HUD Tab</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">⚠️</div>
+        <h3>Bottleneck Detector</h3>
+        <p>Automatically flags the slowest belts relative to your factory's average.
+           Jump straight to the problem without walking every belt manually.</p>
+        <span class="feat-tag tag-hud">HUD Tab</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">🔧</div>
+        <h3>Splitter Wrench</h3>
+        <p>A buyable tool item. <b>Left-click</b> any RollerSplitter or Smart Splitter
+           to configure its routing ratios per resource type.
+           <b>Right-click</b> opens a global overview of every splitter on the map.</p>
+        <span class="feat-tag tag-new">New · v1.0.0</span>
+        <span class="feat-tag tag-tool">Tool Item</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">🏷️</div>
+        <h3>Belt Item Counter</h3>
+        <p>Press <kbd>F6</kbd> to toggle floating IPM labels on belts near you.
+           Numbers update live and color-code by saturation.</p>
+        <span class="feat-tag tag-key">Toggle · F6</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">🔬</div>
+        <h3>Ore Analyser Upgrade</h3>
+        <p>Extends the built-in scanner readout with sell value per unit,
+           processing history, and a quick-compare chart for nearby ore nodes.</p>
+        <span class="feat-tag tag-hud">HUD Tab</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">💰</div>
+        <h3>Sales Tracker</h3>
+        <p>Tracks your session earnings, shows top-selling resources, and
+           calculates your current revenue rate per minute.</p>
+        <span class="feat-tag tag-hud">HUD Tab</span>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">🖥️</div>
+        <h3>Terminal Integration</h3>
+        <p>Open the Factory HUD from any in-game Computer Terminal via the
+           <b>Factory Overview</b> interaction — no need to remember the hotkey.</p>
+        <span class="feat-tag tag-new">New · v1.0.0</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- KEYBINDS -->
+<section id="keybinds">
+  <div class="container">
+    <div class="section-label">Controls</div>
+    <h2>Keybinds &amp; Controls</h2>
+    <p class="section-sub">All MML bindings are non-conflicting and can be changed in BepInEx config.</p>
+
+    <table class="key-table">
+      <thead><tr><th>Key / Action</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><kbd>F5</kbd></td><td>Toggle the MML Factory HUD overlay</td></tr>
+        <tr><td><kbd>F6</kbd></td><td>Toggle floating belt IPM counters</td></tr>
+        <tr><td><kbd>LMB</kbd> with Splitter Wrench</td><td>Configure the splitter you're looking at (up to 8 m)</td></tr>
+        <tr><td><kbd>RMB</kbd> with Splitter Wrench</td><td>Open the global splitter manager</td></tr>
+        <tr><td>Terminal → Factory Overview</td><td>Open/close the HUD from any Computer Terminal</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CHANGELOG -->
+<section id="changelog" style="background:var(--surface)">
+  <div class="container">
+    <div class="section-label">History</div>
+    <h2>Changelog</h2>
+    <p class="section-sub">What changed in each release.</p>
+
+    <div class="cl-legend">
+      <div><div class="dot" style="background:var(--accent2)"></div> Added</div>
+      <div><div class="dot" style="background:var(--warn)"></div> Fixed</div>
+      <div><div class="dot" style="background:var(--danger)"></div> Changed / Removed</div>
+    </div>
+
+    <div class="changelog">
+
+      <!-- v1.0.0 -->
+      <div class="cl-entry">
+        <div class="cl-meta">
+          <div class="cl-ver">v1.0.0</div>
+          <div class="cl-date">May 2026</div>
+          <div class="cl-badge-current">LATEST</div>
+        </div>
+        <div class="cl-body">
+          <ul>
+            <li class="dot-add"><div><b>Splitter Wrench</b> — new holdable tool item purchased from the shop.
+              LMB configures the splitter you aim at (RollerSplitter &amp; ConveyorSplitterT2);
+              RMB opens global manager for all splitters on the map.</div></li>
+            <li class="dot-add"><div><b>Canvas/uGUI UI</b> — dark-themed overlay for splitter config with
+              per-resource routing rules, percentage sliders, and a scrollable rule list.</div></li>
+            <li class="dot-add"><div><b>Terminal integration</b> — "Factory Overview" interaction added to
+              every Computer Terminal; opens the Factory HUD.</div></li>
+            <li class="dot-add"><div><b>Smart Splitter support</b> — ConveyorSplitterT2 routing now also
+              respects MML ratio rules via RotatingThing angle control.</div></li>
+            <li class="dot-fix"><div><b>Shop injection bug</b> fixed — wrench now correctly appears in the
+              Tools tab and is given to the player on purchase.</div></li>
+            <li class="dot-fix"><div><b>Cursor lock</b> fixed — F5 HUD no longer steals cursor focus
+              while the wrench is equipped.</div></li>
+            <li class="dot-fix"><div><b>HUD position</b> moved to the right side of the screen to avoid
+              blocking the quest panel.</div></li>
+            <li class="dot-brk"><div><b>Sorter Presets tab removed</b> — was not achievable without private
+              game API access; replaced by the Splitter Wrench feature.</div></li>
+            <li class="dot-add"><div><b>Factory HUD</b> — live dark overlay with Machines, Belts, Sales, and
+              Settings tabs; toggle with F5.</div></li>
+            <li class="dot-add"><div><b>Throughput Tracker</b> — items/min tracking per conveyor belt.</div></li>
+            <li class="dot-add"><div><b>Bottleneck Detector</b> — auto-flags slowest belts.</div></li>
+            <li class="dot-add"><div><b>Belt Item Counter</b> — world-space IPM labels toggle (F6).</div></li>
+            <li class="dot-add"><div><b>Sales Tracker</b> — session revenue, top resources, rate/min.</div></li>
+            <li class="dot-add"><div><b>Ore Analyser Upgrade</b> — extended scanner readout &amp; sell value.</div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="container">
+    <div class="section-label">Getting started</div>
+    <h2>Installation</h2>
+    <p class="section-sub">Use the included installer — it handles BepInEx and the mod automatically.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Download the installer</h4>
+          <p>Download <code>MML_v1.0.0.zip</code> from the releases page and extract it anywhere.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Run MineMogulModInstaller.exe</h4>
+          <p>Launch the installer. On the landing page you'll see feature highlights and a version badge.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Select your MineMogul folder</h4>
+          <p>Click <em>Browse</em> and navigate to the folder where <code>MineMogul.exe</code> lives.
+             The installer validates the path automatically.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Click Install</h4>
+          <p>The installer copies BepInEx and <code>MML.dll</code> into the correct folders.
+             Launch the game — the mod is active immediately.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h4>In-game: press F5</h4>
+          <p>The Factory HUD opens. Visit the shop terminal in-game to buy the <em>Splitter Wrench</em>
+             from the Tools category.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>MML — Mine Mogul Logic &nbsp;·&nbsp; v1.0.0 &nbsp;·&nbsp; Open-source BepInEx mod</p>
+  <p style="margin-top:.4rem">Not affiliated with NoodleForge or the MineMogul development team.</p>
+</footer>
+
+</body>
+</html>
