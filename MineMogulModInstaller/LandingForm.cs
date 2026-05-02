@@ -219,7 +219,7 @@ namespace MineMogulModInstaller
             // Subtitle
             using var sf  = new Font("Segoe UI", 9.5f);
             using var sb  = new SolidBrush(TextMuted);
-            string sub    = "Satisfactory-style factory analytics for MineMogul";
+            string sub    = "Satisfactory-style factory analytics for MineMogul  •  by Astro16";
             var ss        = g.MeasureString(sub, sf);
             g.DrawString(sub, sf, sb, (W - ss.Width) / 2f, ty + 52f);
 
@@ -330,7 +330,7 @@ namespace MineMogulModInstaller
             float y = FORM_H - 32f;
             using var f = new Font("Segoe UI", 7.5f);
             using var b = new SolidBrush(Color.FromArgb(45, 50, 70));
-            const string txt = "MML v1.0.0  •  Open-source BepInEx mod  •  Not affiliated with NoodleForge";
+            const string txt = "Made by Astro16  •  MML v1.0.0  •  Open-source BepInEx mod  •  Not affiliated with NoodleForge";
             var ts = g.MeasureString(txt, f);
             g.DrawString(txt, f, b, (W - ts.Width) / 2f, y);
         }

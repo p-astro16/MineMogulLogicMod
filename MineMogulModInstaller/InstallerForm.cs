@@ -174,7 +174,7 @@ namespace MineMogulModInstaller
             // ── Footer label ────────────────────────────────────────────────────
             var footer = new Label
             {
-                Text      = "MML v1.0.0  •  BepInEx mod for MineMogul  •  Not affiliated with NoodleForge",
+                Text      = "MML v1.0.0  •  Made by Astro16  •  Not affiliated with NoodleForge",
                 ForeColor = Color.FromArgb(38, 44, 60),
                 BackColor = Color.Transparent,
                 Font      = new Font("Segoe UI", 7.5f),
@@ -292,7 +292,7 @@ namespace MineMogulModInstaller
             // Sub-title
             using var subFont  = new Font("Segoe UI", 9.5f);
             using var subBrush = new SolidBrush(TextMuted);
-            g.DrawString("Mine Mogul Logic", subFont, subBrush, 70, 20);
+            g.DrawString("Mine Mogul Logic  •  by Astro16", subFont, subBrush, 70, 20);
 
             // Right "Installer" badge
             using var bf    = new Font("Segoe UI", 8f, FontStyle.Bold);
@@ -309,7 +309,7 @@ namespace MineMogulModInstaller
             // Version
             using var vf = new Font("Segoe UI", 7.5f);
             using var vb = new SolidBrush(Color.FromArgb(45, 55, 75));
-            g.DrawString("v1.0.0", vf, vb, 16, HEADER_H - 16);
+            g.DrawString("v1.0.0  •  by Astro16", vf, vb, 16, HEADER_H - 16);
         }
 
         private void PaintStatus(object? sender, PaintEventArgs e)

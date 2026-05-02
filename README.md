@@ -1,7 +1,7 @@
 # MML — Mine Mogul Logic  v1.0.0
 
 > **A BepInEx mod for [MineMogul](https://store.steampowered.com/app/MineMogul) that adds Satisfactory-style factory analytics to your mine.**  
-> 📦 [GitHub Repository](https://github.com/p-astro16/MineMogulLogicMod/tree/main) · 🆓 Free & Open-source
+> Made by **Astro16** — 📦 [GitHub Repository](https://github.com/p-astro16/MineMogulLogicMod/tree/main) · 🆓 Free & Open-source
 
 ---
 
