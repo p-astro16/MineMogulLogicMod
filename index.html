@@ -3,366 +3,631 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>MML – Mine Mogul Logic</title>
+<title>MML — Mine Mogul Logic</title>
+<meta name="description" content="Satisfactory-style factory analytics for MineMogul. Live HUD, bottleneck detection, splitter routing and more."/>
 <style>
-  :root{
-    --bg:#0d0f12;--surface:#141720;--card:#1a1e28;--border:#252a38;
-    --accent:#33b5e5;--accent2:#29d96c;--warn:#ffbe28;--danger:#e04040;
-    --text:#e8eaf0;--muted:#7a8099;--code:#c5d0f0;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+/* ── Reset & tokens ─────────────────────────────────────── */
+:root{
+  --bg:#07090e;--surface:#0e1221;--card:#131828;--card2:#171d2e;
+  --border:#1e2540;--border2:#252d48;
+  --accent:#33b5e5;--accent2:#29d96c;--accent3:#8b5cf6;
+  --warn:#f5a623;--danger:#e04040;
+  --text:#e8edf8;--muted:#7282a4;--dim:#3a4462;
+  --glow-a:rgba(51,181,229,.18);--glow-g:rgba(41,217,108,.14);
+  --radius:14px;--radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;overflow-x:hidden}
 
-  /* NAV */
-  nav{position:sticky;top:0;z-index:100;background:rgba(13,15,18,.92);
-      backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:.75rem 2rem}
-  .nav-logo{font-size:1.15rem;font-weight:700;color:var(--accent);letter-spacing:.05em;text-decoration:none}
-  .nav-logo span{color:var(--text)}
-  nav ul{list-style:none;display:flex;gap:1.5rem}
-  nav ul a{color:var(--muted);text-decoration:none;font-size:.9rem;transition:color .2s}
-  nav ul a:hover{color:var(--text)}
-  .nav-badge{background:var(--warn);color:#000;font-size:.7rem;font-weight:700;
-             padding:.15rem .45rem;border-radius:999px;margin-left:.4rem}
+/* ── Animated grid bg ───────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:48px 48px;
+  opacity:.25;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,#000 20%,transparent 80%);
+}
 
-  /* HERO */
-  .hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;
-        justify-content:center;text-align:center;padding:4rem 2rem;
-        background:radial-gradient(ellipse 80% 60% at 50% 0%, #1a2340 0%, var(--bg) 70%)}
-  .hero-badge{display:inline-block;background:var(--border);color:var(--accent);
-              font-size:.75rem;font-weight:600;padding:.3rem .9rem;border-radius:999px;
-              border:1px solid var(--accent);margin-bottom:1.25rem;letter-spacing:.1em}
-  .hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;
-           background:linear-gradient(135deg,#fff 30%,var(--accent));
-           -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .hero h1 span{-webkit-text-fill-color:var(--accent)}
-  .hero p{max-width:640px;margin:1.25rem auto;font-size:1.1rem;color:var(--muted)}
-  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem}
-  .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.75rem;
-       border-radius:8px;font-size:.95rem;font-weight:600;text-decoration:none;
-       transition:filter .2s,transform .2s}
-  .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
-  .btn-primary{background:var(--accent2);color:#000}
-  .btn-secondary{background:var(--border);color:var(--text);border:1px solid var(--muted)}
-  .chip{margin-top:2.5rem;display:inline-flex;gap:.6rem;align-items:center;
-        color:var(--muted);font-size:.8rem}
-  .chip span{background:var(--border);padding:.2rem .6rem;border-radius:4px;font-family:monospace}
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
-  /* SECTIONS */
-  section{padding:5rem 2rem}
-  .container{max-width:1100px;margin:0 auto}
-  .section-label{font-size:.7rem;font-weight:700;color:var(--accent);
-                 letter-spacing:.15em;text-transform:uppercase;margin-bottom:.5rem}
-  h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;margin-bottom:.5rem}
-  .section-sub{color:var(--muted);max-width:560px;margin-bottom:3rem;font-size:.95rem}
+/* ── NAV ────────────────────────────────────────────────── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:rgba(7,9,14,.80);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.7rem 2.5rem;gap:1.5rem;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:.5rem;
+  font-size:1.1rem;font-weight:800;color:var(--text);
+  text-decoration:none;letter-spacing:-.01em;
+  white-space:nowrap;
+}
+.nav-logo .logo-mml{color:var(--accent)}
+.nav-logo .logo-dot{color:var(--dim);font-weight:300;margin:0 .25rem}
+.nav-links{list-style:none;display:flex;gap:1.75rem}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.875rem;transition:color .18s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.nav-badge{
+  background:rgba(41,217,108,.12);color:var(--accent2);
+  border:1px solid rgba(41,217,108,.3);
+  font-size:.68rem;font-weight:700;padding:.2rem .6rem;
+  border-radius:999px;letter-spacing:.06em;
+}
+.nav-gh{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--text);text-decoration:none;
+  font-size:.8rem;font-weight:600;padding:.35rem .8rem;
+  border-radius:7px;transition:border-color .18s,background .18s;
+}
+.nav-gh:hover{border-color:var(--accent);background:var(--card)}
 
-  /* FEATURES GRID */
-  .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem}
-  .feat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
-             padding:1.5rem;transition:border-color .2s,transform .2s}
-  .feat-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .feat-icon{font-size:1.75rem;margin-bottom:.75rem}
-  .feat-card h3{font-size:1rem;font-weight:700;margin-bottom:.35rem}
-  .feat-card p{font-size:.88rem;color:var(--muted);line-height:1.55}
-  .feat-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .5rem;
-            border-radius:4px;margin-top:.5rem}
-  .tag-new{background:rgba(41,217,108,.15);color:var(--accent2)}
-  .tag-hud{background:rgba(51,181,229,.15);color:var(--accent)}
-  .tag-key{background:rgba(255,190,40,.15);color:var(--warn)}
-  .tag-tool{background:rgba(200,100,255,.15);color:#cc88ff}
+/* ── HERO ───────────────────────────────────────────────── */
+.hero{
+  position:relative;z-index:1;
+  min-height:95vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:6rem 2rem 5rem;
+}
+.hero::after{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -10%,rgba(51,181,229,.14) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 40% at 20% 80%,rgba(139,92,246,.10) 0%,transparent 60%);
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(51,181,229,.07);border:1px solid rgba(51,181,229,.25);
+  color:var(--accent);font-size:.72rem;font-weight:700;letter-spacing:.14em;
+  padding:.3rem 1rem;border-radius:999px;margin-bottom:2rem;
+  text-transform:uppercase;
+  animation:fadeUp .7s ease both;
+}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent2);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
 
-  /* KEYBINDS */
-  .key-table{width:100%;border-collapse:collapse;font-size:.9rem}
-  .key-table th{text-align:left;padding:.6rem 1rem;background:var(--surface);
-                color:var(--muted);font-size:.75rem;font-weight:700;letter-spacing:.08em;border-bottom:1px solid var(--border)}
-  .key-table td{padding:.65rem 1rem;border-bottom:1px solid var(--border)}
-  .key-table tr:last-child td{border-bottom:none}
-  kbd{background:var(--surface);border:1px solid var(--border);color:var(--accent);
-      font-family:monospace;font-size:.8rem;padding:.2rem .5rem;border-radius:4px}
+.hero h1{
+  font-size:clamp(2.8rem,7vw,5.5rem);font-weight:900;
+  line-height:1.05;letter-spacing:-.03em;
+  animation:fadeUp .7s .1s ease both;
+}
+.hero h1 .grad{
+  background:linear-gradient(120deg,#fff 0%,var(--accent) 60%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-sub{
+  max-width:600px;margin:1.5rem auto 0;
+  font-size:1.1rem;color:var(--muted);line-height:1.7;
+  animation:fadeUp .7s .2s ease both;
+}
+.hero-btns{
+  display:flex;gap:.875rem;justify-content:center;flex-wrap:wrap;
+  margin-top:2.5rem;
+  animation:fadeUp .7s .3s ease both;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.75rem 1.6rem;border-radius:var(--radius-sm);
+  font-size:.92rem;font-weight:700;text-decoration:none;
+  transition:transform .18s,filter .18s,box-shadow .18s;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent2),#1aaa56);
+  color:#000;
+  box-shadow:0 4px 24px rgba(41,217,108,.25);
+}
+.btn-primary:hover{box-shadow:0 8px 32px rgba(41,217,108,.4)}
+.btn-ghost{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);
+}
+.btn-ghost:hover{border-color:var(--accent);background:rgba(51,181,229,.06)}
 
-  /* CHANGELOG */
-  .changelog{display:flex;flex-direction:column;gap:1.5rem}
-  .cl-entry{display:grid;grid-template-columns:110px 1fr;gap:1rem}
-  .cl-meta{padding-top:.2rem}
-  .cl-ver{font-weight:700;font-size:.95rem;color:var(--text)}
-  .cl-date{font-size:.75rem;color:var(--muted);margin-top:.15rem}
-  .cl-badge-current{display:inline-block;background:var(--accent2);color:#000;
-                    font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;margin-top:.25rem}
-  .cl-body{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.25rem}
-  .cl-body ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
-  .cl-body li{font-size:.9rem;color:var(--muted);display:flex;gap:.6rem;align-items:flex-start}
-  .cl-body li::before{content:"";flex-shrink:0;width:6px;height:6px;border-radius:50%;
-                      margin-top:.45rem;background:var(--border)}
-  .cl-body li b{color:var(--text)}
-  .dot-add::before{background:var(--accent2) !important}
-  .dot-fix::before{background:var(--warn) !important}
-  .dot-brk::before{background:var(--danger) !important}
-  .cl-legend{display:flex;gap:1.25rem;margin-bottom:1.5rem;font-size:.8rem;color:var(--muted)}
-  .cl-legend div{display:flex;align-items:center;gap:.4rem}
-  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* Stat chips row */
+.stat-row{
+  display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;
+  margin-top:3rem;
+  animation:fadeUp .7s .4s ease both;
+}
+.stat-chip{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--card);border:1px solid var(--border);
+  padding:.4rem .9rem;border-radius:8px;font-size:.8rem;
+}
+.stat-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-  /* INSTALL */
-  .steps{display:flex;flex-direction:column;gap:1rem;counter-reset:steps}
-  .step{display:flex;gap:1.25rem;align-items:flex-start;counter-increment:steps}
-  .step-num{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--accent);
-            color:#000;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center}
-  .step-body h4{font-weight:600;margin-bottom:.2rem}
-  .step-body p{font-size:.88rem;color:var(--muted)}
+/* Scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  color:var(--dim);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+  animation:bob 2s ease infinite;
+}
+.scroll-hint::after{
+  content:'';width:1px;height:40px;
+  background:linear-gradient(to bottom,var(--dim),transparent);
+}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
 
-  /* FOOTER */
-  footer{border-top:1px solid var(--border);padding:2rem;text-align:center;
-         color:var(--muted);font-size:.8rem}
-  footer a{color:var(--muted);text-decoration:none}
-  footer a:hover{color:var(--text)}
+/* ── SECTION SHARED ─────────────────────────────────────── */
+section{position:relative;z-index:1;padding:6rem 2rem}
+.container{max-width:1080px;margin:0 auto}
+.section-eyebrow{
+  font-size:.68rem;font-weight:800;color:var(--accent);
+  letter-spacing:.18em;text-transform:uppercase;margin-bottom:.6rem;
+}
+h2{font-size:clamp(1.7rem,3vw,2.6rem);font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
+.section-sub{color:var(--muted);max-width:520px;font-size:.95rem;margin-bottom:3rem;line-height:1.7}
 
-  @media(max-width:600px){
-    .cl-entry{grid-template-columns:1fr}
-    nav ul{display:none}
-  }
+/* Scroll-reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ── FEATURES ───────────────────────────────────────────── */
+.features-bg{background:linear-gradient(to bottom,var(--surface) 0%,var(--bg) 100%)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.25rem}
+.feat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.6rem;
+  transition:border-color .22s,transform .22s,box-shadow .22s;
+  position:relative;overflow:hidden;
+}
+.feat-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(51,181,229,.06),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.feat-card:hover{
+  border-color:var(--accent);transform:translateY(-3px);
+  box-shadow:0 8px 40px rgba(51,181,229,.1);
+}
+.feat-card:hover::before{opacity:1}
+.feat-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.35rem;margin-bottom:1rem;
+  background:rgba(51,181,229,.1);border:1px solid rgba(51,181,229,.2);
+}
+.feat-card h3{font-size:1rem;font-weight:700;margin-bottom:.4rem}
+.feat-card p{font-size:.86rem;color:var(--muted);line-height:1.6}
+.feat-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.tag{display:inline-block;font-size:.63rem;font-weight:700;
+     padding:.18rem .55rem;border-radius:5px;letter-spacing:.04em;text-transform:uppercase}
+.tag-key{background:rgba(245,166,35,.12);color:var(--warn);border:1px solid rgba(245,166,35,.25)}
+.tag-new{background:rgba(41,217,108,.1);color:var(--accent2);border:1px solid rgba(41,217,108,.25)}
+.tag-hud{background:rgba(51,181,229,.1);color:var(--accent);border:1px solid rgba(51,181,229,.25)}
+.tag-tool{background:rgba(139,92,246,.1);color:#a78bfa;border:1px solid rgba(139,92,246,.25)}
+
+/* ── KEYBINDS ───────────────────────────────────────────── */
+.key-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.key-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:1.1rem 1.25rem;
+  display:flex;align-items:center;gap:1rem;
+}
+.key-card:hover{border-color:var(--border2)}
+kbd{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:38px;padding:.3rem .6rem;
+  background:var(--surface);border:1px solid var(--border2);
+  color:var(--accent);font-family:"Cascadia Code","Consolas",monospace;
+  font-size:.8rem;font-weight:700;border-radius:6px;
+  box-shadow:0 2px 0 var(--border2);white-space:nowrap;flex-shrink:0;
+}
+.key-desc{font-size:.875rem;color:var(--text)}
+.key-desc small{display:block;font-size:.78rem;color:var(--muted);margin-top:.1rem}
+
+/* ── CHANGELOG ──────────────────────────────────────────── */
+.changelog-bg{background:var(--surface)}
+.changelog{display:flex;flex-direction:column;gap:1.5rem}
+.cl-entry{display:grid;grid-template-columns:130px 1fr;gap:1.5rem;align-items:start}
+.cl-meta{padding-top:.3rem}
+.cl-ver{font-size:1rem;font-weight:800;color:var(--text)}
+.cl-date{font-size:.75rem;color:var(--muted);margin-top:.2rem}
+.cl-latest{
+  display:inline-block;background:var(--accent2);color:#000;
+  font-size:.62rem;font-weight:800;padding:.15rem .45rem;
+  border-radius:4px;margin-top:.4rem;letter-spacing:.05em;text-transform:uppercase;
+}
+.cl-body{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.4rem;
+}
+.cl-body ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.cl-body li{
+  display:flex;gap:.75rem;align-items:flex-start;
+  font-size:.88rem;color:var(--muted);padding-bottom:.6rem;
+  border-bottom:1px solid var(--border);
+}
+.cl-body li:last-child{border-bottom:none;padding-bottom:0}
+.cl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:.32rem}
+.cl-body li b{color:var(--text)}
+.dot-add{background:var(--accent2)}
+.dot-fix{background:var(--warn)}
+.dot-brk{background:var(--danger)}
+.cl-legend{display:flex;gap:1.25rem;margin-bottom:1.75rem;font-size:.8rem;color:var(--muted);flex-wrap:wrap}
+.cl-legend div{display:flex;align-items:center;gap:.45rem}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── INSTALL ────────────────────────────────────────────── */
+.install-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+.steps{display:flex;flex-direction:column;gap:.75rem;counter-reset:steps}
+.step{
+  display:flex;gap:1.1rem;align-items:flex-start;
+  padding:1rem 1.25rem;border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--card);
+  transition:border-color .2s;
+}
+.step:hover{border-color:var(--border2)}
+.step-num{
+  flex-shrink:0;width:32px;height:32px;border-radius:50%;
+  background:rgba(51,181,229,.12);border:1px solid rgba(51,181,229,.35);
+  color:var(--accent);font-weight:800;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-body h4{font-weight:700;font-size:.92rem;margin-bottom:.2rem}
+.step-body p{font-size:.83rem;color:var(--muted);line-height:1.6}
+code{
+  font-family:"Cascadia Code","Consolas",monospace;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--accent);font-size:.8em;padding:.1rem .35rem;
+  border-radius:4px;
+}
+.manual-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.75rem;
+}
+.manual-box h3{font-size:1rem;font-weight:700;margin-bottom:1.1rem;color:var(--muted)}
+.manual-steps{display:flex;flex-direction:column;gap:.6rem;counter-reset:mc}
+.manual-step{
+  display:flex;gap:.9rem;align-items:flex-start;
+  font-size:.86rem;color:var(--muted);counter-increment:mc;
+}
+.manual-step::before{
+  content:counter(mc);flex-shrink:0;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--dim);font-size:.72rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ── FOOTER ─────────────────────────────────────────────── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+  padding:3rem 2rem;
+}
+.footer-inner{
+  max-width:1080px;margin:0 auto;
+  display:flex;flex-wrap:wrap;gap:2rem;
+  justify-content:space-between;align-items:flex-start;
+}
+.footer-brand .logo{font-size:1.15rem;font-weight:800;color:var(--accent);margin-bottom:.4rem}
+.footer-brand p{font-size:.8rem;color:var(--muted);max-width:260px;line-height:1.6}
+.footer-links h5{font-size:.7rem;font-weight:700;color:var(--dim);
+                  letter-spacing:.14em;text-transform:uppercase;margin-bottom:.75rem}
+.footer-links ul{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.footer-links a{font-size:.85rem;color:var(--muted);text-decoration:none;transition:color .18s}
+.footer-links a:hover{color:var(--text)}
+.footer-bottom{
+  max-width:1080px;margin:2rem auto 0;
+  padding-top:1.5rem;border-top:1px solid var(--border);
+  display:flex;flex-wrap:wrap;gap:.75rem;
+  justify-content:space-between;align-items:center;
+  font-size:.78rem;color:var(--dim);
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media(max-width:760px){
+  nav{padding:.65rem 1.25rem}
+  .nav-links{display:none}
+  section{padding:4rem 1.25rem}
+  .install-grid{grid-template-columns:1fr}
+  .cl-entry{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
+<!-- ── NAV ──────────────────────────────────────────────── -->
 <nav>
-  <a class="nav-logo" href="#">MML <span>Mine Mogul Logic</span></a>
-  <ul>
+  <a class="nav-logo" href="#">
+    <span class="logo-mml">MML</span>
+    <span class="logo-dot">·</span>
+    Mine Mogul Logic
+  </a>
+  <ul class="nav-links">
     <li><a href="#features">Features</a></li>
     <li><a href="#keybinds">Controls</a></li>
     <li><a href="#changelog">Changelog</a></li>
     <li><a href="#install">Install</a></li>
   </ul>
+  <div class="nav-right">
+    <span class="nav-badge">v1.0.0</span>
+    <a class="nav-gh" href="https://github.com/p-astro16/MineMogulLogicMod/tree/main" target="_blank">
+      ⭐ GitHub
+    </a>
+  </div>
 </nav>
 
-<!-- HERO -->
+<!-- ── HERO ─────────────────────────────────────────────── -->
 <section class="hero">
-  <div class="hero-badge">BepInEx Mod · MineMogul</div>
-  <h1>Mine Mogul <span>Logic</span></h1>
-  <p>Satisfactory-style factory analytics for MineMogul — live throughput HUD, bottleneck detection,
-     smart splitter routing, sales tracking and more.</p>
+  <div class="hero-eyebrow">BepInEx 5 Mod &nbsp;·&nbsp; MineMogul</div>
+  <h1><span class="grad">Mine Mogul Logic</span></h1>
+  <p class="hero-sub">
+    Satisfactory-style factory analytics for MineMogul — live throughput HUD,
+    bottleneck detection, smart splitter routing, sales tracking and more.
+  </p>
   <div class="hero-btns">
-    <a class="btn btn-primary" href="https://github.com" download>⬇ Download v1.0.0</a>
-    <a class="btn btn-secondary" href="#features">Explore Features</a>
+    <a class="btn btn-primary" href="https://github.com/p-astro16/MineMogulLogicMod/releases" target="_blank">
+      ⬇&nbsp; Download v1.0.0
+    </a>
+    <a class="btn btn-ghost" href="https://github.com/p-astro16/MineMogulLogicMod/tree/main" target="_blank">
+      View Source
+    </a>
+    <a class="btn btn-ghost" href="#features">Explore Features →</a>
   </div>
-  <div class="chip">
-    <span>BepInEx 5.4.23</span>
-    <span>MineMogul</span>
-    <span>v1.0.0</span>
+  <div class="stat-row">
+    <div class="stat-chip"><div class="dot" style="background:var(--accent2)"></div> Free &amp; Open-source</div>
+    <div class="stat-chip"><div class="dot" style="background:var(--accent)"></div> BepInEx 5.4.23 x64</div>
+    <div class="stat-chip"><div class="dot" style="background:var(--warn)"></div> Windows 10/11 x64</div>
+    <div class="stat-chip"><div class="dot" style="background:var(--accent3)"></div> MineMogul Early Access</div>
   </div>
+  <div class="scroll-hint">Scroll</div>
 </section>
 
-<!-- FEATURES -->
-<section id="features" style="background:var(--surface)">
+<!-- ── FEATURES ─────────────────────────────────────────── -->
+<section id="features" class="features-bg">
   <div class="container">
-    <div class="section-label">What's inside</div>
-    <h2>Features</h2>
-    <p class="section-sub">Everything MML adds to your MineMogul factory session.</p>
-    <div class="features-grid">
+    <div class="reveal">
+      <div class="section-eyebrow">What's inside</div>
+      <h2>Features</h2>
+      <p class="section-sub">Everything MML adds to your MineMogul factory session.</p>
+    </div>
+    <div class="features-grid reveal">
 
       <div class="feat-card">
         <div class="feat-icon">📊</div>
         <h3>Factory HUD</h3>
-        <p>Press <kbd>F5</kbd> to open a live dark-themed overlay with five tabs:
-           Machines, Belts, Sales, Ore Analyser, and Settings.
-           All data updates in real-time while you play.</p>
-        <span class="feat-tag tag-hud">HUD · F5</span>
+        <p>A full dark-themed canvas overlay with tabs for Machines, Belts, Sales and Settings.
+           Draggable, closable, and live-updating while you play.</p>
+        <div class="feat-tags"><span class="tag tag-key">F5</span><span class="tag tag-hud">4 Tabs</span></div>
       </div>
 
       <div class="feat-card">
-        <div class="feat-icon">⚙️</div>
+        <div class="feat-icon">⚡</div>
         <h3>Throughput Tracker</h3>
         <p>Tracks items-per-minute on every conveyor belt in your factory.
-           See what each belt is carrying and at what rate — no guesswork needed.</p>
-        <span class="feat-tag tag-hud">HUD Tab</span>
+           See what each belt carries and at what rate — no guesswork needed.</p>
+        <div class="feat-tags"><span class="tag tag-hud">Belts Tab</span></div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">⚠️</div>
         <h3>Bottleneck Detector</h3>
         <p>Automatically flags the slowest belts relative to your factory's average.
-           Jump straight to the problem without walking every belt manually.</p>
-        <span class="feat-tag tag-hud">HUD Tab</span>
+           Highlighted in red, sorted low→high — jump straight to the problem.</p>
+        <div class="feat-tags"><span class="tag tag-hud">Belts Tab</span></div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">🔧</div>
         <h3>Splitter Wrench</h3>
-        <p>A buyable tool item. <b>Left-click</b> any RollerSplitter or Smart Splitter
-           to configure its routing ratios per resource type.
-           <b>Right-click</b> opens a global overview of every splitter on the map.</p>
-        <span class="feat-tag tag-new">New · v1.0.0</span>
-        <span class="feat-tag tag-tool">Tool Item</span>
+        <p>A buyable tool from the in-game shop. <b>Left-click</b> any RollerSplitter
+           to set routing ratios per resource type. <b>Right-click</b> opens a global view of every splitter on the map.</p>
+        <div class="feat-tags">
+          <span class="tag tag-new">New · v1.0</span>
+          <span class="tag tag-tool">Shop Item</span>
+        </div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">🏷️</div>
-        <h3>Belt Item Counter</h3>
-        <p>Press <kbd>F6</kbd> to toggle floating IPM labels on belts near you.
-           Numbers update live and color-code by saturation.</p>
-        <span class="feat-tag tag-key">Toggle · F6</span>
+        <h3>Belt Scanner</h3>
+        <p>A purchasable tool from the shop (Tools category). Uses the <b>ResourceScanner model</b>. When equipped, floating items/min labels appear above every nearby belt — color-coded by throughput.</p>
+        <div class="feat-tags"><span class="tag tag-tool">Shop Item</span><span class="tag tag-new">New · v1.0</span></div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">🔬</div>
         <h3>Ore Analyser Upgrade</h3>
-        <p>Extends the built-in scanner readout with sell value per unit,
-           processing history, and a quick-compare chart for nearby ore nodes.</p>
-        <span class="feat-tag tag-hud">HUD Tab</span>
+        <p>Extends the built-in scanner with sell value per unit, processing history,
+           and sorter stats for nearby ore nodes.</p>
+        <div class="feat-tags"><span class="tag tag-hud">HUD Tab</span></div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">💰</div>
         <h3>Sales Tracker</h3>
-        <p>Tracks your session earnings, shows top-selling resources, and
-           calculates your current revenue rate per minute.</p>
-        <span class="feat-tag tag-hud">HUD Tab</span>
+        <p>Tracks session earnings, top-selling resources, and calculates your current
+           €/min revenue rate with a live summary in the HUD.</p>
+        <div class="feat-tags"><span class="tag tag-hud">Sales Tab</span></div>
       </div>
 
       <div class="feat-card">
         <div class="feat-icon">🖥️</div>
         <h3>Terminal Integration</h3>
         <p>Open the Factory HUD from any in-game Computer Terminal via the
-           <b>Factory Overview</b> interaction — no need to remember the hotkey.</p>
-        <span class="feat-tag tag-new">New · v1.0.0</span>
+           <b>Factory Overview</b> interaction — no need to remember hotkeys.</p>
+        <div class="feat-tags"><span class="tag tag-new">New · v1.0</span></div>
       </div>
 
     </div>
   </div>
 </section>
 
-<!-- KEYBINDS -->
+<!-- ── KEYBINDS ──────────────────────────────────────────── -->
 <section id="keybinds">
   <div class="container">
-    <div class="section-label">Controls</div>
-    <h2>Keybinds &amp; Controls</h2>
-    <p class="section-sub">All MML bindings are non-conflicting and can be changed in BepInEx config.</p>
-
-    <table class="key-table">
-      <thead><tr><th>Key / Action</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td><kbd>F5</kbd></td><td>Toggle the MML Factory HUD overlay</td></tr>
-        <tr><td><kbd>F6</kbd></td><td>Toggle floating belt IPM counters</td></tr>
-        <tr><td><kbd>LMB</kbd> with Splitter Wrench</td><td>Configure the splitter you're looking at (up to 8 m)</td></tr>
-        <tr><td><kbd>RMB</kbd> with Splitter Wrench</td><td>Open the global splitter manager</td></tr>
-        <tr><td>Terminal → Factory Overview</td><td>Open/close the HUD from any Computer Terminal</td></tr>
-      </tbody>
-    </table>
+    <div class="reveal">
+      <div class="section-eyebrow">Controls</div>
+      <h2>Keybinds</h2>
+      <p class="section-sub">All MML bindings can be changed in the BepInEx config file.</p>
+    </div>
+    <div class="key-grid reveal">
+      <div class="key-card"><kbd>F5</kbd><div class="key-desc">Toggle Factory HUD overlay<small>Opens the live analytics window</small></div></div>
+      <div class="key-card"><kbd>LMB</kbd><div class="key-desc">Configure splitter (Wrench)<small>Point at splitter, up to 8 m</small></div></div>
+      <div class="key-card"><kbd>RMB</kbd><div class="key-desc">Global splitter manager (Wrench)<small>See all splitters on the map</small></div></div>
+      <div class="key-card"><kbd style="font-size:.68rem;min-width:unset;padding:.3rem .5rem">Terminal</kbd><div class="key-desc">Factory Overview interaction<small>Opens HUD from any computer terminal</small></div></div>
+      <div class="key-card"><kbd>Equip</kbd><div class="key-desc">Belt Scanner labels<small>Floating IPM above belts when scanner is held</small></div></div>
+    </div>
   </div>
 </section>
 
-<!-- CHANGELOG -->
-<section id="changelog" style="background:var(--surface)">
+<!-- ── CHANGELOG ─────────────────────────────────────────── -->
+<section id="changelog" class="changelog-bg">
   <div class="container">
-    <div class="section-label">History</div>
-    <h2>Changelog</h2>
-    <p class="section-sub">What changed in each release.</p>
-
-    <div class="cl-legend">
-      <div><div class="dot" style="background:var(--accent2)"></div> Added</div>
-      <div><div class="dot" style="background:var(--warn)"></div> Fixed</div>
-      <div><div class="dot" style="background:var(--danger)"></div> Changed / Removed</div>
+    <div class="reveal">
+      <div class="section-eyebrow">History</div>
+      <h2>Changelog</h2>
+      <p class="section-sub">What changed in each release.</p>
     </div>
 
-    <div class="changelog">
+    <div class="cl-legend reveal">
+      <div><div class="legend-dot" style="background:var(--accent2)"></div>Added</div>
+      <div><div class="legend-dot" style="background:var(--warn)"></div>Fixed</div>
+      <div><div class="legend-dot" style="background:var(--danger)"></div>Changed / Removed</div>
+    </div>
 
-      <!-- v1.0.0 -->
+    <div class="changelog reveal">
       <div class="cl-entry">
         <div class="cl-meta">
           <div class="cl-ver">v1.0.0</div>
           <div class="cl-date">May 2026</div>
-          <div class="cl-badge-current">LATEST</div>
+          <div class="cl-latest">Latest</div>
         </div>
         <div class="cl-body">
           <ul>
-            <li class="dot-add"><div><b>Splitter Wrench</b> — new holdable tool item purchased from the shop.
-              LMB configures the splitter you aim at (RollerSplitter &amp; ConveyorSplitterT2);
-              RMB opens global manager for all splitters on the map.</div></li>
-            <li class="dot-add"><div><b>Canvas/uGUI UI</b> — dark-themed overlay for splitter config with
-              per-resource routing rules, percentage sliders, and a scrollable rule list.</div></li>
-            <li class="dot-add"><div><b>Terminal integration</b> — "Factory Overview" interaction added to
-              every Computer Terminal; opens the Factory HUD.</div></li>
-            <li class="dot-add"><div><b>Smart Splitter support</b> — ConveyorSplitterT2 routing now also
-              respects MML ratio rules via RotatingThing angle control.</div></li>
-            <li class="dot-fix"><div><b>Shop injection bug</b> fixed — wrench now correctly appears in the
-              Tools tab and is given to the player on purchase.</div></li>
-            <li class="dot-fix"><div><b>Cursor lock</b> fixed — F5 HUD no longer steals cursor focus
-              while the wrench is equipped.</div></li>
-            <li class="dot-fix"><div><b>HUD position</b> moved to the right side of the screen to avoid
-              blocking the quest panel.</div></li>
-            <li class="dot-brk"><div><b>Sorter Presets tab removed</b> — was not achievable without private
-              game API access; replaced by the Splitter Wrench feature.</div></li>
-            <li class="dot-add"><div><b>Factory HUD</b> — live dark overlay with Machines, Belts, Sales, and
-              Settings tabs; toggle with F5.</div></li>
-            <li class="dot-add"><div><b>Throughput Tracker</b> — items/min tracking per conveyor belt.</div></li>
-            <li class="dot-add"><div><b>Bottleneck Detector</b> — auto-flags slowest belts.</div></li>
-            <li class="dot-add"><div><b>Belt Item Counter</b> — world-space IPM labels toggle (F6).</div></li>
-            <li class="dot-add"><div><b>Sales Tracker</b> — session revenue, top resources, rate/min.</div></li>
-            <li class="dot-add"><div><b>Ore Analyser Upgrade</b> — extended scanner readout &amp; sell value.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Splitter Wrench</b> — new purchasable tool. LMB configures the splitter you aim at (RollerSplitter &amp; ConveyorSplitterT2); RMB opens global manager for all splitters on the map.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>uGUI Factory HUD</b> — dark canvas-based overlay with Machines, Belts, Sales and Settings tabs; draggable, live-updating, toggled with F5.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Terminal integration</b> — "Factory Overview" interaction added to every Computer Terminal.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Throughput Tracker</b> — items/min per conveyor belt, sorted and color-coded in the HUD.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Bottleneck Detector</b> — statistical outlier detection flags slowest belts in red.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Belt Scanner</b> — new purchasable tool (Tools shop). Uses ResourceScanner model. When equipped, shows floating IPM labels above nearby belts — color-coded: green (fast), yellow (slow), red (bottleneck).</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Sales Tracker</b> — session revenue, top resources, €/min rate.</div></li>
+            <li><div class="cl-dot dot-add"></div><div><b>Ore Analyser Upgrade</b> — extends scanner with sell value &amp; sorter stats.</div></li>
+            <li><div class="cl-dot dot-fix"></div><div><b>Shop injection fix</b> — wrench now correctly appears in the Tools tab and is given to the player on purchase.</div></li>
+            <li><div class="cl-dot dot-fix"></div><div><b>Cursor lock fixed</b> — F5 HUD no longer steals cursor focus while the wrench is equipped.</div></li>
+            <li><div class="cl-dot dot-brk"></div><div><b>Sorter Presets removed</b> — not achievable without private game API access; replaced by Splitter Wrench.</div></li>
           </ul>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- INSTALL -->
+<!-- ── INSTALL ────────────────────────────────────────────── -->
 <section id="install">
   <div class="container">
-    <div class="section-label">Getting started</div>
-    <h2>Installation</h2>
-    <p class="section-sub">Use the included installer — it handles BepInEx and the mod automatically.</p>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-body">
-          <h4>Download the installer</h4>
-          <p>Download <code>MML_v1.0.0.zip</code> from the releases page and extract it anywhere.</p>
+    <div class="reveal">
+      <div class="section-eyebrow">Getting started</div>
+      <h2>Installation</h2>
+      <p class="section-sub">The installer handles BepInEx and the mod automatically.</p>
+    </div>
+    <div class="install-grid reveal">
+      <div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Download the latest release</h4>
+              <p>Grab <code>MML_v1.0.0.zip</code> from the <a href="https://github.com/p-astro16/MineMogulLogicMod/releases" style="color:var(--accent)">GitHub Releases page</a> and extract it anywhere.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>Run MML_Installer.exe</h4>
+              <p>Launch the installer. Your game path is auto-detected via Steam — or click <b>Browse</b> to set it manually.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>Click Install</h4>
+              <p>Copies BepInEx and <code>MML.dll</code> into the correct folders. Launch the game — the mod activates immediately.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>Press F5 in-game</h4>
+              <p>The Factory HUD opens. Visit the in-game shop terminal to buy the <b>Splitter Wrench</b> from the Tools category.</p>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-body">
-          <h4>Run MineMogulModInstaller.exe</h4>
-          <p>Launch the installer. On the landing page you'll see feature highlights and a version badge.</p>
+      <div class="manual-box">
+        <h3>Manual install</h3>
+        <div class="manual-steps">
+          <div class="manual-step">Download <a href="https://github.com/BepInEx/BepInEx/releases" style="color:var(--accent)">BepInEx 5.4.23 x64</a> and extract it into your MineMogul game folder.</div>
+          <div class="manual-step">Copy <code>MML.dll</code> into <code>&lt;MineMogul&gt;/BepInEx/plugins/</code></div>
+          <div class="manual-step">Launch the game. Config is created at <code>BepInEx/config/com.minemogul.mml.cfg</code></div>
+          <div class="manual-step">Press <kbd>F5</kbd> to open the HUD, <kbd>F6</kbd> for belt counters.</div>
         </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-body">
-          <h4>Select your MineMogul folder</h4>
-          <p>Click <em>Browse</em> and navigate to the folder where <code>MineMogul.exe</code> lives.
-             The installer validates the path automatically.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-body">
-          <h4>Click Install</h4>
-          <p>The installer copies BepInEx and <code>MML.dll</code> into the correct folders.
-             Launch the game — the mod is active immediately.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-body">
-          <h4>In-game: press F5</h4>
-          <p>The Factory HUD opens. Visit the shop terminal in-game to buy the <em>Splitter Wrench</em>
-             from the Tools category.</p>
+        <div style="margin-top:1.6rem;padding-top:1.25rem;border-top:1px solid var(--border)">
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:.9rem">Uninstall: run the installer and click <b>Uninstall</b>, or delete <code>BepInEx/plugins/MML.dll</code>.</p>
+          <a class="btn btn-primary" style="font-size:.82rem;padding:.6rem 1.2rem"
+             href="https://github.com/p-astro16/MineMogulLogicMod/releases" target="_blank">
+            ⬇&nbsp; Download on GitHub
+          </a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
 <footer>
-  <p>MML — Mine Mogul Logic &nbsp;·&nbsp; v1.0.0 &nbsp;·&nbsp; Open-source BepInEx mod</p>
-  <p style="margin-top:.4rem">Not affiliated with NoodleForge or the MineMogul development team.</p>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">MML</div>
+      <p>Mine Mogul Logic — a free, open-source BepInEx mod for MineMogul (Steam Early Access).</p>
+    </div>
+    <div class="footer-links">
+      <h5>Project</h5>
+      <ul>
+        <li><a href="https://github.com/p-astro16/MineMogulLogicMod/tree/main" target="_blank">Repository</a></li>
+        <li><a href="https://github.com/p-astro16/MineMogulLogicMod/releases" target="_blank">Releases</a></li>
+        <li><a href="https://github.com/p-astro16/MineMogulLogicMod/issues" target="_blank">Report an issue</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h5>On this page</h5>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#keybinds">Controls</a></li>
+        <li><a href="#changelog">Changelog</a></li>
+        <li><a href="#install">Installation</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>MML v1.0.0 · BepInEx 5.4.23 · netstandard2.1</span>
+    <span>Not affiliated with NoodleForge or the MineMogul development team.</span>
+  </div>
 </footer>
 
+<script>
+// Scroll-reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 </body>
 </html>
