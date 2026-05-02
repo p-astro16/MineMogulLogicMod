@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -31,11 +33,6 @@ namespace MineMogulModInstaller
         static readonly Color LogGreen    = Color.FromArgb(100, 220, 120);
 
         // ── Game path ─────────────────────────────────────────────────────────
-        private readonly string _installerDir = AppContext.BaseDirectory;
-        private string BepInExSourceDir => Path.Combine(_installerDir, "BepInEx_win_x64_5.4.23.5");
-        private string ModDllSource     => Path.Combine(_installerDir, "MML.dll");
-        private static readonly string[] BepInExRootFiles =
-            { "winhttp.dll", "doorstop_config.ini", ".doorstop_version", "changelog.txt" };
 
         // ── Controls ──────────────────────────────────────────────────────────
         private TextBox      txtGamePath    = new();
@@ -472,27 +469,14 @@ namespace MineMogulModInstaller
                 SetBusy(true);
                 _progressTarget = 0f; _progressCurrent = 0f;
                 Log(""); Log("─── Installation started ──────────────────");
-                Log("Copying BepInEx root files...");
-                _progressTarget = 0.2f;
-                CopyBepInExRoot(gamePath);
+                Log("Extracting BepInEx...");
+                _progressTarget = 0.6f;
+                ExtractBepInExZip(gamePath);
 
-                Log("Copying BepInEx/core...");
-                _progressTarget = 0.5f;
-                CopyDir(Path.Combine(BepInExSourceDir, "BepInEx", "core"),
-                        Path.Combine(gamePath, "BepInEx", "core"));
-
-                _progressTarget = 0.75f;
+                _progressTarget = 0.85f;
                 string pluginsDir = Path.Combine(gamePath, "BepInEx", "plugins");
-                Directory.CreateDirectory(pluginsDir);
-
-                if (!File.Exists(ModDllSource))
-                    Log("WARNING: MML.dll not found next to installer.");
-                else
-                {
-                    string dest = Path.Combine(pluginsDir, "MML.dll");
-                    File.Copy(ModDllSource, dest, overwrite: true);
-                    Log("Mod copied → " + dest);
-                }
+                Log("Copying MML.dll...");
+                WriteEmbeddedMmlDll(pluginsDir);
 
                 _progressTarget = 1f;
                 Log(""); Log("✓ Installation complete!  Launch MineMogul to activate.");
@@ -526,8 +510,8 @@ namespace MineMogulModInstaller
                     if (File.Exists(dll)) { File.Delete(dll); Log("Removed: " + dll); }
                 string cfg = Path.Combine(gamePath, "BepInEx", "config", "com.minemogul.mml.cfg");
                 if (File.Exists(cfg)) { File.Delete(cfg); Log("Removed config: " + cfg); }
-                foreach (var file in BepInExRootFiles)
-                { string fp = Path.Combine(gamePath, file); if (File.Exists(fp)) { File.Delete(fp); Log("Removed: " + file); } }
+                foreach (var f in new[]{ "winhttp.dll","doorstop_config.ini",".doorstop_version","changelog.txt" })
+                { string fp = Path.Combine(gamePath, f); if (File.Exists(fp)) { File.Delete(fp); Log("Removed: " + f); } }
                 string bepDir = Path.Combine(gamePath, "BepInEx");
                 if (Directory.Exists(bepDir))
                 {
@@ -558,21 +542,40 @@ namespace MineMogulModInstaller
         {
             if (!Directory.Exists(path)) { MessageBox.Show("Please select a valid folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
             if (!File.Exists(Path.Combine(path, "MineMogul.exe"))) { MessageBox.Show("MineMogul.exe not found in this folder.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning); return false; }
-            if (!Directory.Exists(BepInExSourceDir)) { MessageBox.Show("BepInEx source not found:\n" + BepInExSourceDir, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error); return false; }
             return true;
         }
 
-        private void CopyBepInExRoot(string gamePath)
-        { foreach (var file in BepInExRootFiles) { string src = Path.Combine(BepInExSourceDir, file); if (!File.Exists(src)) continue; File.Copy(src, Path.Combine(gamePath, file), true); Log("  " + file); } }
-
-        private void CopyDir(string src, string dst)
+        // ── Embedded resource helpers ──────────────────────────────────────────
+        private static Stream GetEmbeddedStream(string name)
         {
-            if (!Directory.Exists(src)) { Log("  WARNING: source not found: " + src); return; }
-            Directory.CreateDirectory(dst);
-            foreach (var file in Directory.GetFiles(src))
-            { string name = Path.GetFileName(file); File.Copy(file, Path.Combine(dst, name), true); Log("  " + name); }
-            foreach (var dir in Directory.GetDirectories(src))
-                CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
+            var asm = Assembly.GetExecutingAssembly();
+            string fullName = asm.GetManifestResourceNames()
+                .First(n => n.EndsWith(name, StringComparison.OrdinalIgnoreCase));
+            return asm.GetManifestResourceStream(fullName)!;
+        }
+
+        private void ExtractBepInExZip(string gamePath)
+        {
+            using var stream = GetEmbeddedStream("BepInEx.zip");
+            using var zip = new ZipArchive(stream, ZipArchiveMode.Read);
+            foreach (var entry in zip.Entries)
+            {
+                if (string.IsNullOrEmpty(entry.Name)) continue; // directory entry
+                string destPath = Path.Combine(gamePath, entry.FullName);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+                entry.ExtractToFile(destPath, overwrite: true);
+                Log("  " + entry.FullName);
+            }
+        }
+
+        private void WriteEmbeddedMmlDll(string pluginsDir)
+        {
+            Directory.CreateDirectory(pluginsDir);
+            string dest = Path.Combine(pluginsDir, "MML.dll");
+            using var stream = GetEmbeddedStream("MML.dll");
+            using var fs = File.Create(dest);
+            stream.CopyTo(fs);
+            Log("Mod copied \u2192 " + dest);
         }
 
         private void Log(string msg)

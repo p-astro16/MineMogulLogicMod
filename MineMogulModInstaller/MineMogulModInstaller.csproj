@@ -12,6 +12,8 @@
   <ItemGroup>
     <EmbeddedResource Include="banner.png" />
     <EmbeddedResource Include="app.ico" />
+    <EmbeddedResource Include="MML.dll" />
+    <EmbeddedResource Include="BepInEx.zip" />
   </ItemGroup>
 
 </Project>
