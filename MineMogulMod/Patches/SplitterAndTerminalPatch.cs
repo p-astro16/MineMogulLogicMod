@@ -150,6 +150,7 @@ namespace MineMogulMod.Patches
                 if (!toolsCategory.ShopItemDefinitions.Contains(SplitterShopInjector.ShopItemDef))
                 {
                     toolsCategory.ShopItemDefinitions.Add(SplitterShopInjector.ShopItemDef);
+                    toolsCategory.ShopItems.Add(new ShopItem(SplitterShopInjector.ShopItemDef));
                     Plugin.Logger.LogInfo($"[MML] Splitter Wrench injected into \"{toolsCategory.CategoryName}\".");
                 }
 
@@ -171,6 +172,7 @@ namespace MineMogulMod.Patches
                 if (!toolsCategory.ShopItemDefinitions.Contains(BeltScannerShopInjector.ShopItemDef))
                 {
                     toolsCategory.ShopItemDefinitions.Add(BeltScannerShopInjector.ShopItemDef);
+                    toolsCategory.ShopItems.Add(new ShopItem(BeltScannerShopInjector.ShopItemDef));
                     Plugin.Logger.LogInfo($"[MML] Belt Scanner injected into \"{toolsCategory.CategoryName}\".");
                 }
 
