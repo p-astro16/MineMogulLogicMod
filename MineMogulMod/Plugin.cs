@@ -27,7 +27,7 @@ namespace MineMogulMod
             _harmony.PatchAll();
 
             Logger.LogInfo($"[MML] {MyPluginInfo.PLUGIN_NAME} v{MyPluginInfo.PLUGIN_VERSION} loaded.");
-            Logger.LogInfo("[MML] F5 = Factory HUD  |  F6 = Belt Counter  |  F7 = Spawn Splitter Wrench");
+            Logger.LogInfo("[MML] F5 = Factory HUD  |  F6 = Belt Counter  |  F7 = Spawn Splitter Wrench  |  F = Splitter Config");
         }
 
         private void Start()
@@ -42,6 +42,7 @@ namespace MineMogulMod
             AddSafe<FactoryHUD>         (root, "FactoryHUD");
             AddSafe<SplitterConfigUI>   (root, "SplitterConfigUI");
             AddSafe<WrenchSpawnWatcher> (root, "WrenchSpawnWatcher");
+            AddSafe<SplitterInspector>  (root, "SplitterInspector");
 
             try { SplitterStorage.Load(); }
             catch (System.Exception ex) { Logger.LogWarning("[MML] SplitterStorage.Load failed: " + ex.Message); }

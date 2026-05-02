@@ -15,7 +15,8 @@ namespace MineMogulMod
         // ── Hotkeys ────────────────────────────────────────────────────────────
         public static ConfigEntry<KeyboardShortcut> HUDToggleKey         = null!;
         public static ConfigEntry<KeyboardShortcut> BeltCounterToggleKey = null!;
-        public static ConfigEntry<KeyboardShortcut> WrenchSpawnKey       = null!;
+        public static ConfigEntry<KeyboardShortcut> WrenchSpawnKey         = null!;
+        public static ConfigEntry<KeyboardShortcut> SplitterInteractKey    = null!;
 
         // ── Throughput ─────────────────────────────────────────────────────────
         public static ConfigEntry<float> ThroughputWindowSeconds = null!;
@@ -47,6 +48,7 @@ namespace MineMogulMod
             HUDToggleKey         = cfg.Bind(sKeys, "HUDToggle",         new KeyboardShortcut(KeyCode.F5), "Toggle Factory HUD.");
             BeltCounterToggleKey = cfg.Bind(sKeys, "BeltCounterToggle", new KeyboardShortcut(KeyCode.F6), "Toggle belt item counter.");
             WrenchSpawnKey       = cfg.Bind(sKeys, "WrenchSpawn",       new KeyboardShortcut(KeyCode.F7), "Spawn Splitter Wrench into inventory.");
+            SplitterInteractKey  = cfg.Bind(sKeys, "SplitterInteract",  new KeyboardShortcut(KeyCode.F),   "Configureer de splitter waar je naar kijkt.");
 
             const string sTP = "3. Throughput";
             ThroughputWindowSeconds = cfg.Bind(sTP, "WindowSeconds", 60f,
