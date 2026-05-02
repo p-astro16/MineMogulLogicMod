@@ -26,9 +26,9 @@ namespace MineMogulModInstaller
         static readonly Color TextMuted   = Color.FromArgb(100, 110, 140);
 
         // ── Layout ─────────────────────────────────────────────────────────────
-        private const int W        = 640;
+        private const int W        = 660;
         private const int HEADER_H = 200;
-        private const int FORM_H   = 610;
+        private const int FORM_H   = 640;
 
         // Feature cards: 2 columns, 3 rows
         private const int CARD_W   = (W - 36) / 2;   // 302
@@ -61,19 +61,20 @@ namespace MineMogulModInstaller
         // ── Feature definitions ───────────────────────────────────────────────
         private static readonly (string Icon, string Title, string Desc, string Tag, Color TagCol)[] Features =
         {
-            ("📊", "Factory HUD",         "Live overlay: Machines, Belts, Sales & Settings tabs. Toggle with F5.",        "F5",  Color.FromArgb(51,181,229)),
-            ("🔧", "Splitter Wrench",      "Buyable tool. LMB configures the aimed splitter, RMB shows all on the map.",   "SHOP",Color.FromArgb(41,210,110)),
-            ("⚠️", "Bottleneck Detector",  "Highlights the slowest conveyor belt so you can fix the weakest link fast.",   "HUD", Color.FromArgb(230,160,30)),
-            ("📡", "Belt Scanner",         "Equippable tool. Floating items-per-minute labels on nearby belts.",           "SHOP",Color.FromArgb(51,181,229)),
-            ("💰", "Sales Tracker",        "Session revenue, top-selling resources, and live earnings rate per minute.",    "HUD", Color.FromArgb(51,181,229)),
-            ("🖥️", "Terminal Integration", "Open Factory HUD from any Computer Terminal via Factory Overview.",            "NEW", Color.FromArgb(41,210,110)),
+            ("📊", "Factory HUD",         "Live overlay: Machines, Belts, Sales & Settings tabs. Toggle with F5.",                   "F5",  Color.FromArgb(51,181,229)),
+            ("🔧", "Splitter Inspector",   "Kijk naar een splitter → druk F om te configureren. Tab voor alle splitters.",            "F",   Color.FromArgb(41,210,110)),
+            ("⚠️", "Bottleneck Detector",  "Highlights the slowest conveyor belt so you can fix the weakest link fast.",              "HUD", Color.FromArgb(230,160,30)),
+            ("🏷️", "Belt Inspector",       "Kijk naar een belt → detail panel rechtsonder. F6 = zwevende labels op alle belts.",      "F6",  Color.FromArgb(51,181,229)),
+            ("💰", "Sales Tracker",        "Session revenue, top-selling resources, and live earnings rate per minute.",               "HUD", Color.FromArgb(51,181,229)),
+            ("🖥️", "Terminal Integration", "Open Factory HUD from any Computer Terminal via Factory Overview.",                       "NEW", Color.FromArgb(41,210,110)),
         };
 
         // ─────────────────────────────────────────────────────────────────────
         public LandingForm()
         {
             SuspendLayout();
-            AutoScaleMode   = AutoScaleMode.None;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode   = AutoScaleMode.Dpi;
             ClientSize      = new Size(W, FORM_H);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox     = false;

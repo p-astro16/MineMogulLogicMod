@@ -31,10 +31,10 @@ namespace MineMogulModInstaller
         static readonly Color LogGreen    = Color.FromArgb(100, 220, 120);
 
         // ── Layout ─────────────────────────────────────────────────────────────
-        private const int W        = 640;
+        private const int W        = 660;
         private const int HEADER_H = 64;
-        private const int PAD      = 14;
-        private const int FORM_H   = 500;
+        private const int PAD      = 16;
+        private const int FORM_H   = 600;
 
         // ── Controls ───────────────────────────────────────────────────────────
         private readonly Panel      pnlHeader   = new();
@@ -65,7 +65,8 @@ namespace MineMogulModInstaller
         public InstallerForm()
         {
             SuspendLayout();
-            AutoScaleMode   = AutoScaleMode.None;
+            AutoScaleDimensions = new SizeF(96F, 96F);
+            AutoScaleMode   = AutoScaleMode.Dpi;
             ClientSize      = new Size(W, FORM_H);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox     = false;
@@ -103,8 +104,8 @@ namespace MineMogulModInstaller
             AddSectionLabel("GAME FOLDER", PAD, y);
             y += 20;
 
-            // Path textbox: fills to leave room for 2 buttons (76+80+8+8 = 172)
-            txtGamePath.Bounds          = new Rectangle(PAD, y, W - PAD * 2 - 172, 26);
+            // Path textbox: fills to leave room for 2 buttons (80+80+10+10 = 180)
+            txtGamePath.Bounds          = new Rectangle(PAD, y, W - PAD * 2 - 180, 28);
             txtGamePath.BackColor       = Color.FromArgb(20, 23, 34);
             txtGamePath.ForeColor       = TextPrimary;
             txtGamePath.BorderStyle     = BorderStyle.FixedSingle;
@@ -113,53 +114,53 @@ namespace MineMogulModInstaller
             Controls.Add(txtGamePath);
 
             int bx = txtGamePath.Right + 8;
-            StyleSmallButton(btnBrowse, "Browse", bx,      y, 76, 26, Accent,    btnBrowse_Click);
-            StyleSmallButton(btnAuto,   "⟳ Auto",  bx + 84, y, 72, 26, TextMuted, btnAuto_Click);
+            StyleSmallButton(btnBrowse, "Browse", bx,      y, 80, 28, Accent,    btnBrowse_Click);
+            StyleSmallButton(btnAuto,   "⟳ Auto",  bx + 88, y, 76, 28, TextMuted, btnAuto_Click);
             Controls.Add(btnBrowse);
             Controls.Add(btnAuto);
-            y += 34;
+            y += 38;
 
             // ── Status ──────────────────────────────────────────────────────────
-            pnlStatus.Bounds    = new Rectangle(PAD, y, W - PAD * 2, 24);
+            pnlStatus.Bounds    = new Rectangle(PAD, y, W - PAD * 2, 26);
             pnlStatus.BackColor = Color.Transparent;
             pnlStatus.Paint     += PaintStatus;
             Controls.Add(pnlStatus);
-            y += 32;
+            y += 36;
 
             // ── Actions ─────────────────────────────────────────────────────────
             AddSectionLabel("ACTIONS", PAD, y);
             y += 20;
 
-            int actionW = (W - PAD * 2 - 8) / 3;
-            StyleActionButton(btnInstall,    "↓  Install",      PAD,                    y, actionW, 44, Color.FromArgb(22, 80, 42), AccentGreen, btnInstall_Click);
-            StyleActionButton(btnUninstall,  "×  Uninstall",    PAD + actionW + 4,      y, actionW, 44, Color.FromArgb(70, 18, 18), AccentRed,   btnUninstall_Click);
-            StyleActionButton(btnFolder,     "📂  Open Folder", PAD + (actionW + 4) * 2, y, actionW, 44, Surface,                   TextMuted,   btnOpenFolder_Click);
+            int actionW = (W - PAD * 2 - 12) / 3;
+            StyleActionButton(btnInstall,    "↓  Install",      PAD,                       y, actionW, 48, Color.FromArgb(22, 80, 42), AccentGreen, btnInstall_Click);
+            StyleActionButton(btnUninstall,  "×  Uninstall",    PAD + actionW + 6,         y, actionW, 48, Color.FromArgb(70, 18, 18), AccentRed,   btnUninstall_Click);
+            StyleActionButton(btnFolder,     "📂  Open Folder", PAD + (actionW + 6) * 2,   y, actionW, 48, Surface,                   TextMuted,   btnOpenFolder_Click);
             Controls.Add(btnInstall);
             Controls.Add(btnUninstall);
             Controls.Add(btnFolder);
-            y += 52;
+            y += 58;
 
             // ── Checkbox ────────────────────────────────────────────────────────
             chkRemoveBep.Text      = "Also remove BepInEx folder on uninstall";
             chkRemoveBep.ForeColor = TextMuted;
             chkRemoveBep.BackColor = Color.Transparent;
             chkRemoveBep.Font      = new Font("Segoe UI", 8.5f);
-            chkRemoveBep.Bounds    = new Rectangle(PAD, y, 340, 20);
+            chkRemoveBep.Bounds    = new Rectangle(PAD, y, 360, 22);
             Controls.Add(chkRemoveBep);
-            y += 28;
+            y += 32;
 
             // ── Progress bar ────────────────────────────────────────────────────
-            pnlProgress.Bounds    = new Rectangle(PAD, y, W - PAD * 2, 5);
+            pnlProgress.Bounds    = new Rectangle(PAD, y, W - PAD * 2, 6);
             pnlProgress.BackColor = Color.FromArgb(22, 26, 38);
             pnlProgress.Paint     += PaintProgress;
             Controls.Add(pnlProgress);
-            y += 14;
+            y += 18;
 
             // ── Log ─────────────────────────────────────────────────────────────
             AddSectionLabel("LOG", PAD, y);
-            y += 20;
+            y += 22;
 
-            int logBottom = FORM_H - 28;
+            int logBottom = FORM_H - 32;
             txtLog.Bounds      = new Rectangle(PAD, y, W - PAD * 2, logBottom - y);
             txtLog.BackColor   = Color.FromArgb(10, 12, 18);
             txtLog.ForeColor   = LogGreen;
@@ -179,7 +180,7 @@ namespace MineMogulModInstaller
                 Font      = new Font("Segoe UI", 7.5f),
                 AutoSize  = false,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Bounds    = new Rectangle(0, FORM_H - 24, W, 22)
+                Bounds    = new Rectangle(0, FORM_H - 28, W, 26)
             };
             Controls.Add(footer);
         }
